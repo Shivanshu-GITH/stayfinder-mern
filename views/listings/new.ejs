@@ -1,93 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Listing | StayFinder</title>
-</head>
-<body>
+<% layout("/layouts/boilerplate") %>
 
-    <h1>Create a New Listing</h1>
+<div class="container edit-page-container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
 
-    <form action="/listings" method="POST">
+      <div class="edit-card">
+        <h2 class="edit-title">Create a New Listing</h2>
 
-        <div>
-            <label for="title">Title:</label><br>
+        <form action="/listings" method="POST" class="needs-validation" novalidate>
+          
+          <div class="mb-4">
+            <label for="title" class="form-label">Title</label>
             <input 
-                type="text" 
-                id="title" 
-                name="listing[title]" 
-                placeholder="Enter property title"
-                required
-            >
-        </div>
+              type="text" 
+              id="title" 
+              name="listing[title]" 
+              placeholder="Give your place a catchy title"
+              class="form-control"
+              required
+            />
+            <div class="invalid-feedback">Please enter a title.</div>
+          </div>
 
-        <br>
-
-        <div>
-            <label for="description">Description:</label><br>
+          <div class="mb-4">
+            <label for="description" class="form-label">Description</label>
             <textarea 
-                id="description" 
-                name="listing[description]" 
-                rows="4"
-                placeholder="Enter description"
+              id="description" 
+              name="listing[description]" 
+              placeholder="Describe the vibe of your place..."
+              class="form-control"
+              rows="4"
+              required
             ></textarea>
-        </div>
+            <div class="invalid-feedback">Please include a short description.</div>
+          </div>
 
-        <br>
-
-        <div>
-            <label for="image">Image URL:</label><br>
+          <div class="mb-4">
+            <label for="image" class="form-label">Image Link</label>
             <input 
-                type="text" 
-                id="image" 
-                name="listing[image][url]" 
-                placeholder="Enter image URL"
-            >
-        </div>
+              type="text" 
+              id="image" 
+              name="listing[image][url]" 
+              placeholder="Paste an image URL (Unsplash / Cloudinary)"
+              class="form-control"
+            />
+          </div>
 
-        <br>
-
-        <div>
-            <label for="price">Price (₹):</label><br>
-            <input 
+          <div class="row">
+            <div class="mb-4 col-md-4">
+              <label for="price" class="form-label">Price (₹)</label>
+              <input 
                 type="number" 
                 id="price" 
                 name="listing[price]" 
-                placeholder="Enter price"
+                placeholder="e.g. 1200"
+                class="form-control"
                 required
-            >
-        </div>
+              />
+              <div class="invalid-feedback">Please enter a valid price.</div>
+            </div>
 
-        <br>
-
-        <div>
-            <label for="location">Location:</label><br>
-            <input 
-                type="text" 
-                id="location" 
-                name="listing[location]" 
-                placeholder="Enter location"
-            >
-        </div>
-
-        <br>
-
-        <div>
-            <label for="country">Country:</label><br>
-            <input 
+            <div class="mb-4 col-md-8">
+              <label for="country" class="form-label">Country</label>
+              <input 
                 type="text" 
                 id="country" 
                 name="listing[country]" 
-                placeholder="Enter country"
-            >
-        </div>
+                placeholder="India"
+                class="form-control"
+                required
+              />
+              <div class="invalid-feedback">Country name is required.</div>
+            </div>
+          </div>
 
-        <br><br>
+          <div class="mb-4">
+            <label for="location" class="form-label">Location</label>
+            <input 
+              type="text" 
+              id="location" 
+              name="listing[location]" 
+              placeholder="Jaipur, Rajasthan"
+              class="form-control"
+              required
+            />
+            <div class="invalid-feedback">Location should be valid.</div>
+          </div>
 
-        <button type="submit">Create Listing</button>
+          <button class="btn save-btn w-100 mt-3">
+            Add Listing
+          </button>
 
-    </form>
+        </form>
+      </div>
 
-</body>
-</html>
+    </div>
+  </div>
+</div>

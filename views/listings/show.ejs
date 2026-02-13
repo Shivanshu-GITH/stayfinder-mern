@@ -1,26 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StayFinder</title>
-</head>
-<body>
-    <h1>Listing Details: </h1>
-    <ul>
-        <li><%= listing.title %> </li>
-        <li><%= listing.description %> </li>
-        <li>&#8377; <%= listing.price.toLocaleString("en-IN") %> </li>
-        <li><%= listing.location %> </li>
-        <li><%= listing.country %> </li>
+<% layout("/layouts/boilerplate") %>
 
-    </ul>
-    <br>
-    <a href="/listings/<%= listing._id %>/edit">Edit this listing</a>
-    <br>
-    <br>
-    <form action="/listings/<%= listing._id %>?_method=Delete", method="post">
-        <button>Delete this listing</button>
-    </form>
-</body>
-</html>
+<div class="container show-page-container">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+
+      <h2 class="show-title mb-4">
+        <%= listing.title %>
+      </h2>
+
+      <div class="card show-card listing-card">
+
+        <img 
+          src="<%= listing.image.url %>" 
+          class="card-img-top show-img" 
+          alt="listing_image"
+        />
+
+        <div class="card-body show-body">
+
+          <p class="host-text">
+            Hosted by <span>StayFinder Host</span>
+          </p>
+
+          <p class="show-description">
+            <%= listing.description %>
+          </p>
+
+          <div class="show-price">
+            ₹ <%= listing.price.toLocaleString("en-IN") %>
+            <span>/ night</span>
+          </div>
+
+          <div class="show-location">
+            <%= listing.location %>, <%= listing.country %>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="show-actions mt-4">
+        <a 
+          href="/listings/<%= listing._id %>/edit" 
+          class="btn edit-btn"
+        >
+          Edit
+        </a>
+
+        <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+          <button class="btn delete-btn">
+            Delete
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
