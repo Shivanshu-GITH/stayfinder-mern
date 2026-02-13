@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Listing | StayFinder</title>
+</head>
+<body>
+
+    <h1>Create a New Listing</h1>
+
+    <form action="/listings" method="POST">
+
+        <div>
+            <label for="title">Title:</label><br>
+            <input 
+                type="text" 
+                id="title" 
+                name="listing[title]" 
+                placeholder="Enter property title"
+                required
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label for="description">Description:</label><br>
+            <textarea 
+                id="description" 
+                name="listing[description]" 
+                rows="4"
+                placeholder="Enter description"
+            ></textarea>
+        </div>
+
+        <br>
+
+        <div>
+            <label for="image">Image URL:</label><br>
+            <input 
+                type="text" 
+                id="image" 
+                name="listing[image][url]" 
+                placeholder="Enter image URL"
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label for="price">Price (₹):</label><br>
+            <input 
+                type="number" 
+                id="price" 
+                name="listing[price]" 
+                placeholder="Enter price"
+                required
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label for="location">Location:</label><br>
+            <input 
+                type="text" 
+                id="location" 
+                name="listing[location]" 
+                placeholder="Enter location"
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label for="country">Country:</label><br>
+            <input 
+                type="text" 
+                id="country" 
+                name="listing[country]" 
+                placeholder="Enter country"
+            >
+        </div>
+
+        <br><br>
+
+        <button type="submit">Create Listing</button>
+
+    </form>
+
+</body>
+</html>
