@@ -6,10 +6,17 @@
     <h2 class="fw-semibold">Explore Listings</h2>
   </div>
 
+  <% if (allListings.length === 0) { %>
+    <div class="text-center text-muted mt-5">
+      <h5>No listings available yet</h5>
+      <p>Be the first one to add a place</p>
+    </div>
+  <% } %>
+
   <div class="row g-4">
 
     <% for (let listing of allListings) { %>
-      
+
       <div class="col-lg-4 col-md-6 col-sm-12">
         <a href="/listings/<%= listing._id %>" class="listing-link">
 
@@ -17,7 +24,7 @@
 
             <div class="position-relative">
               <img 
-                src="<%= listing.image.url %>" 
+                src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" 
                 class="card-img-top"
                 alt="listing_image"
               />
@@ -34,7 +41,7 @@
               </p>
 
               <p class="fw-semibold mb-0">
-                ₹ <%= listing.price.toLocaleString("en-IN") %> 
+                ₹ <%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %>
                 <span class="text-muted fw-normal"> / night</span>
               </p>
             </div>

@@ -1,88 +1,176 @@
-const express= require("express");
-const app= express();
-const mongoose= require("mongoose");
-const Listing= require("../stayfinder-mern/models/listing.js");
-const path= require("path");
-const methodOverride= require("method-override");
-const ejsMate= require("ejs-mate");
+const express = require("express");
+const app = express();
+const mongoose = require("mongoose");
+const path = require("path");
 
-MONGO_URL="mongodb://127.0.0.1:27017/stayfinder";
+const Listing = require("./models/listing.js");
 
-main().then(()=>{
-    console.log("Connected to DB");
-}).catch((err)=>{
-    console.log(err);
-});
+const methodOverride = require("method-override");
+const ejsMate = require("ejs-mate");
+const session = require("express-session");
+const flash = require("connect-flash");
 
-async function main() {
-    await mongoose.connect(MONGO_URL);
-}
+const wrapAsync = require("./utils/wrapAsync");
+const ExpressError = require("./utils/ExpressError");
+const { validateListing } = require("./middleware");
 
+const MONGO_URL = "mongodb://127.0.0.1:27017/stayfinder";
+const SESSION_SECRET = "stayfindersecret";
+
+mongoose
+  .connect(MONGO_URL)
+  .then(() => console.log("Connected to DB"))
+  .catch(err => console.log(err));
+
+
+app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({extended: true}));
-app.use(methodOverride("_method"));
-app.engine('ejs', ejsMate);
-app.use(express.static(path.join(__dirname, "/public")));
 
-app.get("/", (req, res)=>{
-    res.send("Hi, I am root");
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
+app.use(express.static(path.join(__dirname, "public")));
+
+
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24
+    }
+  })
+);
+
+app.use(flash());
+
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  next();
 });
 
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
 
-//Index Route
-app.get("/listings", async (req, res) => {
+app.get(
+  "/listings",
+  wrapAsync(async (req, res) => {
     const allListings = await Listing.find({});
     res.render("listings/index", { allListings });
+  })
+);
+
+
+app.get("/listings/new", (req, res) => {
+  res.render("listings/new");
 });
 
-//Route for the creation of new list: includes new and the create route...
-//New Route
-app.get("/listings/new", (req, res) =>{
-    res.render("listings/new");
-});
-
-
-//Create Route
-app.post("/listings", async (req, res) => {
+app.post(
+  "/listings",
+  validateListing,
+  wrapAsync(async (req, res) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
+    req.flash("success", "New listing created successfully");
     res.redirect("/listings");
-});
+  })
+);
+
+app.get(
+  "/listings/:id",
+  wrapAsync(async (req, res) => {
+    const listing = await Listing.findById(req.params.id);
+    if (!listing) {
+      throw new ExpressError("Listing not found", 404);
+    }
+    res.render("listings/show", { listing });
+  })
+);
+
+app.get(
+  "/listings/:id/edit",
+  wrapAsync(async (req, res) => {
+    const listing = await Listing.findById(req.params.id);
+    if (!listing) {
+      throw new ExpressError("Listing not found", 404);
+    }
+    res.render("listings/edit", { listing });
+  })
+);
 
 
-//Route for Updations includes edit and update route
+app.put(
+  "/listings/:id",
+  validateListing,
+  wrapAsync(async (req, res) => {
+    const listing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      req.body.listing,
+      {
+        runValidators: true,
+        returnDocument: "after"
+      }
+    );
 
-//Edit Route
-app.get("/listings/:id/edit", async (req, res)=>{
-    let {id}= req.params;
-    const listing= await Listing.findById(id);
-    res.render("listings/edit", {listing});
-});
+    if (!listing) {
+      throw new ExpressError("Cannot update non-existent listing", 404);
+    }
 
-//Update Route
-app.put("/listings/:id", async (req, res) => {
-    const { id } = req.params;
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    res.redirect(`/listings/${id}`);
-});
+    req.flash("success", "Listing updated successfully");
+    res.redirect(`/listings/${req.params.id}`);
+  })
+);
 
-
-//Delete Route
-app.delete("/listings/:id", async (req, res)=>{
-    const { id } = req.params;
-    let deleteListing = await Listing.findByIdAndDelete(id);
-    console.log(deleteListing);
+app.delete(
+  "/listings/:id",
+  wrapAsync(async (req, res) => {
+    const listing = await Listing.findByIdAndDelete(req.params.id);
+    if (!listing) {
+      throw new ExpressError("Cannot delete non-existent listing", 404);
+    }
+    req.flash("success", "Listing deleted successfully");
     res.redirect("/listings");
-})
+  })
+);
 
-//Show Route
-app.get("/listings/:id", async (req, res)=>{
-    let {id}= req.params;
-    const listing= await Listing.findById(id);
-    res.render("listings/show", {listing});
+
+app.use((req, res, next) => {
+  next(new ExpressError("Page Not Found", 404));
 });
 
-app.listen(8080, ()=>{
-    console.log("Server is listening to port 8080");
+
+app.use((err, req, res, next) => {
+  let statusCode = err.statusCode || 500;
+  let message = err.message || "Something went wrong";
+
+  if (err.name === "CastError") {
+    statusCode = 404;
+    message = "The page you are looking for does not exist.";
+  }
+
+  if (statusCode === 500) {
+    message = "Something went wrong on our side. Please try again later.";
+  }
+
+  console.error(err);
+
+  if (req.headers.accept?.includes("application/json")) {
+    return res.status(statusCode).json({
+      status: "error",
+      statusCode,
+      message
+    });
+  }
+
+  res.status(statusCode).render("error", {
+    statusCode,
+    message
+  });
+});
+
+app.listen(8080, () => {
+  console.log("Server is listening on port 8080");
 });

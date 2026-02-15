@@ -12,7 +12,7 @@
       <div class="card show-card listing-card">
 
         <img 
-          src="<%= listing.image.url %>" 
+          src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" 
           class="card-img-top show-img" 
           alt="listing_image"
         />
@@ -28,7 +28,7 @@
           </p>
 
           <div class="show-price">
-            ₹ <%= listing.price.toLocaleString("en-IN") %>
+            ₹ <%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %>
             <span>/ night</span>
           </div>
 

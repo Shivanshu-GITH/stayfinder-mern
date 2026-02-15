@@ -18,8 +18,9 @@
               placeholder="Give your place a catchy title"
               class="form-control"
               required
+              minlength="5"
             />
-            <div class="invalid-feedback">Please enter a title.</div>
+            <div class="invalid-feedback">Title must be at least 5 characters long.</div>
           </div>
 
           <div class="mb-4">
@@ -31,19 +32,22 @@
               class="form-control"
               rows="4"
               required
+              minlength="20"
             ></textarea>
-            <div class="invalid-feedback">Please include a short description.</div>
+            <div class="invalid-feedback">Description must be at least 20 characters long.</div>
           </div>
 
           <div class="mb-4">
             <label for="image" class="form-label">Image Link</label>
             <input 
-              type="text" 
+              type="url" 
               id="image" 
               name="listing[image][url]" 
-              placeholder="Paste an image URL (Unsplash / Cloudinary)"
+              placeholder="https://example.com/image.jpg"
               class="form-control"
+              pattern="https?://.+"
             />
+            <div class="invalid-feedback">Please enter a valid image URL.</div>
           </div>
 
           <div class="row">
@@ -56,8 +60,9 @@
                 placeholder="e.g. 1200"
                 class="form-control"
                 required
+                min="1"
               />
-              <div class="invalid-feedback">Please enter a valid price.</div>
+              <div class="invalid-feedback">Price must be greater than 0.</div>
             </div>
 
             <div class="mb-4 col-md-8">
@@ -69,8 +74,9 @@
                 placeholder="India"
                 class="form-control"
                 required
+                pattern="^[A-Za-z ]+$"
               />
-              <div class="invalid-feedback">Country name is required.</div>
+              <div class="invalid-feedback">Country name must contain letters only.</div>
             </div>
           </div>
 
@@ -83,8 +89,9 @@
               placeholder="Jaipur, Rajasthan"
               class="form-control"
               required
+              pattern="^[A-Za-z ,]+$"
             />
-            <div class="invalid-feedback">Location should be valid.</div>
+            <div class="invalid-feedback">Location should contain only letters and commas.</div>
           </div>
 
           <button class="btn save-btn w-100 mt-3">

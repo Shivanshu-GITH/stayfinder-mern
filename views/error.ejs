@@ -1,0 +1,26 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="error-page-container">
+  <div class="error-card">
+    <div class="error-icon">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+
+    <h1 class="error-code">
+      <%= statusCode || 500 %>
+    </h1>
+
+    <h2 class="error-title">
+      <%= message || "Something went wrong" %>
+    </h2>
+
+    <p class="error-description">
+      The page you’re looking for doesn’t exist or an unexpected error occurred.
+      Let’s get you back to exploring amazing places.
+    </p>
+
+    <a href="/listings" class="btn error-btn">
+      Back to Listings
+    </a>
+  </div>
+</div>

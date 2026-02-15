@@ -7,78 +7,103 @@
       <div class="edit-card">
         <h2 class="edit-title">Edit Listing</h2>
 
-        <form action="/listings/<%= listing._id %>?_method=PUT" 
-              method="POST" 
-              class="needs-validation" 
+        <form action="/listings/<%= listing._id %>?_method=PUT"
+              method="POST"
+              class="needs-validation"
               novalidate>
 
           <div class="mb-4">
             <label for="title" class="form-label">Title</label>
-            <input type="text"
-                   id="title"
-                   name="listing[title]"
-                   value="<%= listing.title %>"
-                   class="form-control"
-                   required>
+            <input
+              type="text"
+              id="title"
+              name="listing[title]"
+              value="<%= listing.title %>"
+              class="form-control"
+              required
+              minlength="5"
+            />
+            <div class="invalid-feedback">Title must be at least 5 characters long.</div>
           </div>
 
           <div class="mb-4">
             <label for="description" class="form-label">Description</label>
-            <textarea id="description"
-                      name="listing[description]"
-                      class="form-control"
-                      rows="4"
-                      required><%= listing.description %></textarea>
+            <textarea
+              id="description"
+              name="listing[description]"
+              class="form-control"
+              rows="4"
+              required
+              minlength="20"><%= listing.description %></textarea>
+            <div class="invalid-feedback">Description must be at least 20 characters long.</div>
           </div>
 
           <div class="mb-4">
             <label class="form-label">Current Image</label>
             <div class="edit-image-wrapper">
-              <img src="<%= listing.image.url %>" 
-                   alt="listing image"
-                   class="edit-preview-img">
+              <img
+                src="<%= listing.image.url %>"
+                alt="listing image"
+                class="edit-preview-img">
             </div>
           </div>
 
           <div class="mb-4">
-            <label for="image" class="form-label">Update Image URL</label>
-            <input type="text"
-                   id="image"
-                   name="listing[image][url]"
-                   value="<%= listing.image.url %>"
-                   class="form-control">
+            <label for="image" class="form-label">Image URL</label>
+            <input
+              type="url"
+              id="image"
+              name="listing[image][url]"
+              value="<%= listing.image.url %>"
+              class="form-control"
+              required
+              pattern="https?://.+"
+            />
+            <div class="invalid-feedback">Please enter a valid image URL.</div>
           </div>
 
           <div class="row">
             <div class="mb-4 col-md-4">
               <label for="price" class="form-label">Price (₹)</label>
-              <input type="number"
-                     id="price"
-                     name="listing[price]"
-                     value="<%= listing.price %>"
-                     class="form-control"
-                     required>
+              <input
+                type="number"
+                id="price"
+                name="listing[price]"
+                value="<%= listing.price %>"
+                class="form-control"
+                required
+                min="1"
+              />
+              <div class="invalid-feedback">Price must be greater than 0.</div>
             </div>
 
             <div class="mb-4 col-md-8">
               <label for="country" class="form-label">Country</label>
-              <input type="text"
-                     id="country"
-                     name="listing[country]"
-                     value="<%= listing.country %>"
-                     class="form-control"
-                     required>
+              <input
+                type="text"
+                id="country"
+                name="listing[country]"
+                value="<%= listing.country %>"
+                class="form-control"
+                required
+                pattern="^[A-Za-z ]+$"
+              />
+              <div class="invalid-feedback">Country name must contain letters only.</div>
             </div>
           </div>
 
           <div class="mb-4">
             <label for="location" class="form-label">Location</label>
-            <input type="text"
-                   id="location"
-                   name="listing[location]"
-                   value="<%= listing.location %>"
-                   class="form-control"
-                   required>
+            <input
+              type="text"
+              id="location"
+              name="listing[location]"
+              value="<%= listing.location %>"
+              class="form-control"
+              required
+              pattern="^[A-Za-z ,]+$"
+            />
+            <div class="invalid-feedback">Location should contain only letters and commas.</div>
           </div>
 
           <button class="btn save-btn w-100 mt-3">
