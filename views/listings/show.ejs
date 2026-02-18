@@ -1,7 +1,6 @@
 <% layout("/layouts/boilerplate") %>
 
 <div class="container show-page-container">
-
   <div class="row justify-content-center">
     <div class="col-lg-8 col-md-10">
 
@@ -12,13 +11,14 @@
       <div class="card show-card listing-card">
 
         <img 
-          src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" 
+          src="<%= listing.image && listing.image.url 
+            ? listing.image.url 
+            : 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" 
           class="card-img-top show-img" 
           alt="listing_image"
         />
 
         <div class="card-body show-body">
-
           <p class="host-text">
             Hosted by <span>StayFinder Host</span>
           </p>
@@ -28,18 +28,19 @@
           </p>
 
           <div class="show-price">
-            ₹ <%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %>
+            ₹ <%= listing.price 
+              ? listing.price.toLocaleString("en-IN") 
+              : "N/A" %>
             <span>/ night</span>
           </div>
 
           <div class="show-location">
             <%= listing.location %>, <%= listing.country %>
           </div>
-
         </div>
       </div>
 
-      <div class="show-actions mt-4">
+      <div class="show-actions mt-4 d-flex gap-2">
         <a 
           href="/listings/<%= listing._id %>/edit" 
           class="btn edit-btn"
@@ -47,14 +48,112 @@
           Edit
         </a>
 
-        <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+        <form 
+          method="POST" 
+          action="/listings/<%= listing._id %>?_method=DELETE"
+        >
           <button class="btn delete-btn">
             Delete
           </button>
         </form>
       </div>
 
+      <hr class="my-5">
+
+      <h3 class="mb-3">Add a Review</h3>
+
+      <form 
+        action="/listings/<%= listing._id %>/reviews" 
+        method="POST"
+        class="review-form mb-5"
+      >
+
+        <div class="mb-3">
+          <label class="form-label rating-label">
+            Rate your experience
+          </label>
+
+          <div class="star-rating">
+            <% for (let i = 5; i >= 1; i--) { %>
+              <input 
+                type="radio" 
+                id="star<%= i %>" 
+                name="review[rating]" 
+                value="<%= i %>" 
+                required
+              />
+              <label for="star<%= i %>">★</label>
+            <% } %>
+          </div>
+
+          <small class="rating-hint">
+            1 = Poor • 5 = Excellent
+          </small>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">
+            Your Review
+          </label>
+
+          <textarea 
+            name="review[comment]" 
+            class="form-control"
+            rows="3"
+            placeholder="Share your experience..."
+            required
+          ></textarea>
+        </div>
+
+        <button class="btn btn-primary">
+          Submit Review
+        </button>
+      </form>
+
+      <h3 class="mb-3">Reviews</h3>
+
+      <% if (listing.reviews.length === 0) { %>
+        <p class="text-muted">
+          No reviews yet. Be the first to review!
+        </p>
+      <% } %>
+
+      <% for (let review of listing.reviews) { %>
+        <div class="review-card">
+
+          <div class="review-header">
+            <div class="review-stars">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <span class="<%= i <= review.rating ? 'filled' : '' %>">
+                  ★
+                </span>
+              <% } %>
+            </div>
+          </div>
+
+          <p class="review-text">
+            <%= review.comment %>
+          </p>
+
+          <% if (review.author) { %>
+            <small class="review-author">
+              — <%= review.author.username %>
+            </small>
+          <% } %>
+
+          <form 
+            method="POST"
+            action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+            class="mt-2"
+          >
+            <button class="btn btn-sm btn-danger">
+              Delete
+            </button>
+          </form>
+
+        </div>
+      <% } %>
+
     </div>
   </div>
-
 </div>

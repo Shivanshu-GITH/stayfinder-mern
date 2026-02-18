@@ -393,3 +393,91 @@ textarea.form-control {
   background-color: #e03150;
   transform: translateY(-2px);
 }
+
+
+
+.review-form {
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+.rating-label {
+  font-weight: 600;
+  font-size: 1.05rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+
+.star-rating {
+  direction: rtl;
+  display: inline-flex;
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+  color: #ffcc00;
+}
+
+.star-rating label:hover {
+  transform: scale(1.15);
+}
+
+.rating-hint {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+
+.review-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.review-stars {
+  font-size: 1.3rem;
+}
+
+.review-stars span {
+  color: #ddd;
+}
+
+.review-stars span.filled {
+  color: #ffcc00;
+}
+
+.review-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 8px 0;
+  color: #333;
+}
+
+.review-author {
+  font-size: 0.85rem;
+  color: #777;
+}
