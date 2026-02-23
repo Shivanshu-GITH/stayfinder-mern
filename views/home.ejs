@@ -1,0 +1,37 @@
+<% layout('layouts/boilerplate') %>
+
+<% css = "/css/home.css" %>
+
+<section class="hero">
+    <div class="hero-content text-center">
+        <h1 class="hero-title">Find Your Perfect Stay</h1>
+        <p class="hero-subtitle">
+            Discover unique homes, experiences, and places around the world.
+        </p>
+
+        <% if (!currentUser) { %>
+            <div class="hero-buttons">
+                <a href="/register" class="btn btn-lg btn-primary me-3">Get Started</a>
+                <a href="/login" class="btn btn-lg btn-outline-light">Login</a>
+            </div>
+        <% } %>
+
+    </div>
+</section>
+
+<section class="features container text-center mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <h4>🏡 Unique Stays</h4>
+            <p>Explore curated stays across cities and nature.</p>
+        </div>
+        <div class="col-md-4">
+            <h4>🔒 Secure Booking</h4>
+            <p>Safe and trusted booking experience.</p>
+        </div>
+        <div class="col-md-4">
+            <h4>⭐ Verified Reviews</h4>
+            <p>Real reviews from real travelers.</p>
+        </div>
+    </div>
+</section>

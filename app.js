@@ -16,7 +16,6 @@ const ExpressError = require("./utils/ExpressError");
 const { validateListing } = require("./middleware");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/stayfinder";
-const SESSION_SECRET = "stayfindersecret";
 
 mongoose
   .connect(MONGO_URL)
@@ -33,7 +32,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
   session({
-    secret: SESSION_SECRET,
+    secret: "stayfindersecret",
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -48,11 +47,13 @@ app.use(flash());
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+  res.locals.currentUser = req.user || null;
+  res.locals.path = req.path;
   next();
 });
 
 app.get("/", (req, res) => {
-  res.redirect("/listings");
+  res.render("home");
 });
 
 app.get(
@@ -81,18 +82,8 @@ app.post(
 app.get(
   "/listings/:id",
   wrapAsync(async (req, res) => {
-    const listing = await Listing.findById(req.params.id)
-      .populate({
-        path: "reviews",
-        populate: {
-          path: "author",
-        },
-      });
-
-    if (!listing) {
-      throw new ExpressError("Listing not found", 404);
-    }
-
+    const listing = await Listing.findById(req.params.id).populate("reviews");
+    if (!listing) throw new ExpressError("Listing not found", 404);
     res.render("listings/show", { listing });
   })
 );
@@ -101,9 +92,7 @@ app.get(
   "/listings/:id/edit",
   wrapAsync(async (req, res) => {
     const listing = await Listing.findById(req.params.id);
-    if (!listing) {
-      throw new ExpressError("Listing not found", 404);
-    }
+    if (!listing) throw new ExpressError("Listing not found", 404);
     res.render("listings/edit", { listing });
   })
 );
@@ -115,16 +104,9 @@ app.put(
     const listing = await Listing.findByIdAndUpdate(
       req.params.id,
       req.body.listing,
-      {
-        runValidators: true,
-        returnDocument: "after",
-      }
+      { runValidators: true, returnDocument: "after" }
     );
-
-    if (!listing) {
-      throw new ExpressError("Cannot update non-existent listing", 404);
-    }
-
+    if (!listing) throw new ExpressError("Cannot update listing", 404);
     req.flash("success", "Listing updated successfully");
     res.redirect(`/listings/${req.params.id}`);
   })
@@ -134,9 +116,7 @@ app.delete(
   "/listings/:id",
   wrapAsync(async (req, res) => {
     const listing = await Listing.findByIdAndDelete(req.params.id);
-    if (!listing) {
-      throw new ExpressError("Cannot delete non-existent listing", 404);
-    }
+    if (!listing) throw new ExpressError("Cannot delete listing", 404);
     req.flash("success", "Listing deleted successfully");
     res.redirect("/listings");
   })
@@ -146,19 +126,11 @@ app.post(
   "/listings/:id/reviews",
   wrapAsync(async (req, res) => {
     const listing = await Listing.findById(req.params.id);
-
-    if (!listing) {
-      throw new ExpressError("Listing not found", 404);
-    }
-
+    if (!listing) throw new ExpressError("Listing not found", 404);
     const review = new Review(req.body.review);
-    review.author = req.user?._id; // safe for now
-
     listing.reviews.push(review);
-
     await review.save();
     await listing.save();
-
     req.flash("success", "Review added successfully");
     res.redirect(`/listings/${listing._id}`);
   })
@@ -168,13 +140,8 @@ app.delete(
   "/listings/:id/reviews/:reviewId",
   wrapAsync(async (req, res) => {
     const { id, reviewId } = req.params;
-
-    await Listing.findByIdAndUpdate(id, {
-      $pull: { reviews: reviewId },
-    });
-
+    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
     await Review.findByIdAndDelete(reviewId);
-
     req.flash("success", "Review deleted");
     res.redirect(`/listings/${id}`);
   })
@@ -185,22 +152,10 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  let statusCode = err.statusCode || 500;
-  let message = err.message || "Something went wrong";
-
-  if (err.name === "CastError") {
-    statusCode = 404;
-    message = "The page you are looking for does not exist.";
-  }
-
-  console.error(err);
-
-  res.status(statusCode).render("error", {
-    statusCode,
-    message,
-  });
+  const { statusCode = 500, message = "Something went wrong" } = err;
+  res.status(statusCode).render("error", { message });
 });
 
 app.listen(8080, () => {
-  console.log("Server is listening on port 8080");
+  console.log("Server running on port 8080");
 });
