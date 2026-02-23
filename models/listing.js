@@ -7,6 +7,7 @@ const listingSchema = new Schema(
       type: String,
       required: true,
     },
+
     description: String,
 
     image: {
@@ -25,6 +26,11 @@ const listingSchema = new Schema(
     location: String,
     country: String,
 
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     reviews: [
       {
         type: Schema.Types.ObjectId,
@@ -33,7 +39,7 @@ const listingSchema = new Schema(
     ],
   },
   {
-    strictPopulate: false, // ✅ FIX
+    strictPopulate: false,
   }
 );
 

@@ -40,75 +40,86 @@
         </div>
       </div>
 
-      <div class="show-actions mt-4 d-flex gap-2">
-        <a 
-          href="/listings/<%= listing._id %>/edit" 
-          class="btn edit-btn"
-        >
-          Edit
-        </a>
+      <!-- 🔐 EDIT / DELETE (ONLY OWNER) -->
+      <% if (currentUser && listing.owner && listing.owner._id.equals(currentUser._id)) { %>
+        <div class="show-actions mt-4 d-flex gap-2">
+          <a 
+            href="/listings/<%= listing._id %>/edit" 
+            class="btn edit-btn"
+          >
+            Edit
+          </a>
 
-        <form 
-          method="POST" 
-          action="/listings/<%= listing._id %>?_method=DELETE"
-        >
-          <button class="btn delete-btn">
-            Delete
-          </button>
-        </form>
-      </div>
+          <form 
+            method="POST" 
+            action="/listings/<%= listing._id %>?_method=DELETE"
+          >
+            <button class="btn delete-btn">
+              Delete
+            </button>
+          </form>
+        </div>
+      <% } %>
 
       <hr class="my-5">
 
-      <h3 class="mb-3">Add a Review</h3>
+      <!-- 🔐 ADD REVIEW -->
+      <% if (currentUser) { %>
+        <h3 class="mb-3">Add a Review</h3>
 
-      <form 
-        action="/listings/<%= listing._id %>/reviews" 
-        method="POST"
-        class="review-form mb-5"
-      >
+        <form 
+          action="/listings/<%= listing._id %>/reviews" 
+          method="POST"
+          class="review-form mb-5"
+        >
 
-        <div class="mb-3">
-          <label class="form-label rating-label">
-            Rate your experience
-          </label>
+          <div class="mb-3">
+            <label class="form-label rating-label">
+              Rate your experience
+            </label>
 
-          <div class="star-rating">
-            <% for (let i = 5; i >= 1; i--) { %>
-              <input 
-                type="radio" 
-                id="star<%= i %>" 
-                name="review[rating]" 
-                value="<%= i %>" 
-                required
-              />
-              <label for="star<%= i %>">★</label>
-            <% } %>
+            <div class="star-rating">
+              <% for (let i = 5; i >= 1; i--) { %>
+                <input 
+                  type="radio" 
+                  id="star<%= i %>" 
+                  name="review[rating]" 
+                  value="<%= i %>" 
+                  required
+                />
+                <label for="star<%= i %>">★</label>
+              <% } %>
+            </div>
+
+            <small class="rating-hint">
+              1 = Poor • 5 = Excellent
+            </small>
           </div>
 
-          <small class="rating-hint">
-            1 = Poor • 5 = Excellent
-          </small>
-        </div>
+          <div class="mb-3">
+            <label class="form-label">
+              Your Review
+            </label>
 
-        <div class="mb-3">
-          <label class="form-label">
-            Your Review
-          </label>
+            <textarea 
+              name="review[comment]" 
+              class="form-control"
+              rows="3"
+              placeholder="Share your experience..."
+              required
+            ></textarea>
+          </div>
 
-          <textarea 
-            name="review[comment]" 
-            class="form-control"
-            rows="3"
-            placeholder="Share your experience..."
-            required
-          ></textarea>
-        </div>
+          <button class="btn btn-primary">
+            Submit Review
+          </button>
+        </form>
 
-        <button class="btn btn-primary">
-          Submit Review
-        </button>
-      </form>
+      <% } else { %>
+        <p class="text-muted mb-5">
+          <a href="/login">Login</a> to add a review.
+        </p>
+      <% } %>
 
       <h3 class="mb-3">Reviews</h3>
 
@@ -141,15 +152,18 @@
             </small>
           <% } %>
 
-          <form 
-            method="POST"
-            action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
-            class="mt-2"
-          >
-            <button class="btn btn-sm btn-danger">
-              Delete
-            </button>
-          </form>
+          <!-- 🔐 DELETE REVIEW (ONLY AUTHOR) -->
+          <% if (currentUser && review.author && review.author._id.equals(currentUser._id)) { %>
+            <form 
+              method="POST"
+              action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+              class="mt-2"
+            >
+              <button class="btn btn-sm btn-danger">
+                Delete
+              </button>
+            </form>
+          <% } %>
 
         </div>
       <% } %>

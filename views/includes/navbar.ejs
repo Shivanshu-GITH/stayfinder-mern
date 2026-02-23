@@ -1,9 +1,9 @@
 <nav class="navbar navbar-expand-lg navbar-light custom-navbar sticky-top">
   <div class="container">
 
-   <a class="navbar-brand brand-logo" href="/">
-     <i class="fa-regular fa-compass me-2"></i>StayFinder
-   </a>
+    <a class="navbar-brand brand-logo" href="/">
+      <i class="fa-regular fa-compass me-2"></i>StayFinder
+    </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
@@ -12,15 +12,48 @@
     <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
       <ul class="navbar-nav align-items-center gap-3">
 
-        <li class="nav-item">
-          <a class="nav-link nav-hover" href="/listings">Explore</a>
-        </li>
+        <!-- Explore -->
+        <% if (!path.startsWith("/listings")) { %>
+          <li class="nav-item">
+            <a class="nav-link nav-hover" href="/listings">Explore</a>
+          </li>
+        <% } %>
 
-        <li class="nav-item">
-          <a class="btn add-listing-btn" href="/listings/new">
-            Add Listing
-          </a>
-        </li>
+        <% if (currentUser) { %>
+          <!-- Add Listing (ONLY if logged in) -->
+          <li class="nav-item">
+            <a class="btn add-listing-btn" href="/listings/new">
+              Add Listing
+            </a>
+          </li>
+
+          <!-- Username -->
+          <li class="nav-item">
+            <span class="nav-link fw-bold">
+              Hi, <%= currentUser.username %>
+            </span>
+          </li>
+
+          <!-- Logout -->
+          <li class="nav-item">
+            <a class="nav-link text-danger" href="/logout">
+              Logout
+            </a>
+          </li>
+
+        <% } else { %>
+          <!-- Login -->
+          <li class="nav-item">
+            <a class="nav-link nav-hover" href="/login">Login</a>
+          </li>
+
+          <!-- Signup -->
+          <li class="nav-item">
+            <a class="btn btn-outline-primary" href="/signup">
+              Sign Up
+            </a>
+          </li>
+        <% } %>
 
       </ul>
     </div>
