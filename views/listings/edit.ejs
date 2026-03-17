@@ -7,103 +7,179 @@
       <div class="edit-card">
         <h2 class="edit-title">Edit Listing</h2>
 
+        <!-- CURRENT IMAGES (OUTSIDE MAIN FORM) -->
+        <div class="mb-4">
+          <label class="form-label">Current Images</label>
+
+          <div class="d-flex flex-wrap gap-3">
+
+            <% if (listing.images && listing.images.length > 0) { %>
+
+              <% for (let img of listing.images) { %>
+
+                <div style="position:relative">
+
+                  <img
+                    src="<%= img.url %>"
+                    style="width:120px;height:120px;object-fit:cover;border-radius:10px;"
+                  >
+
+                  <!-- DELETE IMAGE FORM -->
+                  <form
+                    action="/listings/<%= listing._id %>/images?_method=DELETE"
+                    method="POST"
+                    style="position:absolute;top:5px;right:5px"
+                  >
+
+                    <input
+                      type="hidden"
+                      name="filename"
+                      value="<%= img.filename %>"
+                    >
+
+                    <button
+                      type="submit"
+                      style="
+                        background:red;
+                        color:white;
+                        border:none;
+                        border-radius:50%;
+                        width:26px;
+                        height:26px;
+                        font-size:16px;
+                        line-height:20px;
+                        cursor:pointer;
+                      ">
+                      ×
+                    </button>
+
+                  </form>
+
+                </div>
+
+              <% } %>
+
+            <% } else { %>
+
+              <p class="text-muted">No images uploaded</p>
+
+            <% } %>
+
+          </div>
+        </div>
+
+
+        <!-- MAIN EDIT FORM STARTS HERE -->
         <form action="/listings/<%= listing._id %>?_method=PUT"
               method="POST"
+              enctype="multipart/form-data"
               class="needs-validation"
               novalidate>
 
+          <!-- TITLE -->
           <div class="mb-4">
-            <label for="title" class="form-label">Title</label>
+            <label class="form-label">Title</label>
             <input
               type="text"
-              id="title"
               name="listing[title]"
               value="<%= listing.title %>"
               class="form-control"
               required
               minlength="5"
-            />
-            <div class="invalid-feedback">Title must be at least 5 characters long.</div>
+            >
+            <div class="invalid-feedback">
+              Title must be at least 5 characters long.
+            </div>
           </div>
 
+          <!-- DESCRIPTION -->
           <div class="mb-4">
-            <label for="description" class="form-label">Description</label>
+            <label class="form-label">Description</label>
             <textarea
-              id="description"
               name="listing[description]"
               class="form-control"
               rows="4"
               required
               minlength="20"><%= listing.description %></textarea>
-            <div class="invalid-feedback">Description must be at least 20 characters long.</div>
-          </div>
-
-          <div class="mb-4">
-            <label class="form-label">Current Image</label>
-            <div class="edit-image-wrapper">
-              <img
-                src="<%= listing.image.url %>"
-                alt="listing image"
-                class="edit-preview-img">
+            <div class="invalid-feedback">
+              Description must be at least 20 characters long.
             </div>
           </div>
 
+          <!-- UPLOAD NEW IMAGES -->
           <div class="mb-4">
-            <label for="image" class="form-label">Image URL</label>
+
+            <label class="form-label">Upload New Images</label>
+
             <input
-              type="url"
-              id="image"
-              name="listing[image][url]"
-              value="<%= listing.image.url %>"
+              type="file"
+              id="images"
+              name="images"
+              multiple
               class="form-control"
-              required
-              pattern="https?://.+"
-            />
-            <div class="invalid-feedback">Please enter a valid image URL.</div>
+              accept="image/*"
+            >
+
+            <small class="text-muted">
+              Uploading new images will add them to the listing.
+            </small>
+
+            <div id="imagePreviewContainer"
+                 class="mt-3 d-flex flex-wrap gap-2">
+            </div>
+
           </div>
 
           <div class="row">
+
+            <!-- PRICE -->
             <div class="mb-4 col-md-4">
-              <label for="price" class="form-label">Price (₹)</label>
+              <label class="form-label">Price (₹)</label>
               <input
                 type="number"
-                id="price"
                 name="listing[price]"
                 value="<%= listing.price %>"
                 class="form-control"
                 required
                 min="1"
-              />
-              <div class="invalid-feedback">Price must be greater than 0.</div>
+              >
+              <div class="invalid-feedback">
+                Price must be greater than 0.
+              </div>
             </div>
 
+            <!-- COUNTRY -->
             <div class="mb-4 col-md-8">
-              <label for="country" class="form-label">Country</label>
+              <label class="form-label">Country</label>
               <input
                 type="text"
-                id="country"
                 name="listing[country]"
                 value="<%= listing.country %>"
                 class="form-control"
                 required
                 pattern="^[A-Za-z ]+$"
-              />
-              <div class="invalid-feedback">Country name must contain letters only.</div>
+              >
+              <div class="invalid-feedback">
+                Country name must contain letters only.
+              </div>
             </div>
+
           </div>
 
+          <!-- LOCATION -->
           <div class="mb-4">
-            <label for="location" class="form-label">Location</label>
+            <label class="form-label">Location</label>
             <input
               type="text"
-              id="location"
               name="listing[location]"
               value="<%= listing.location %>"
               class="form-control"
               required
               pattern="^[A-Za-z ,]+$"
-            />
-            <div class="invalid-feedback">Location should contain only letters and commas.</div>
+            >
+            <div class="invalid-feedback">
+              Location should contain only letters and commas.
+            </div>
           </div>
 
           <button class="btn save-btn w-100 mt-3">
@@ -111,8 +187,41 @@
           </button>
 
         </form>
+
       </div>
 
     </div>
   </div>
 </div>
+
+
+<!-- IMAGE PREVIEW SCRIPT -->
+
+<script>
+
+const imageInput = document.getElementById("images");
+const previewContainer = document.getElementById("imagePreviewContainer");
+
+imageInput.addEventListener("change", function () {
+
+  previewContainer.innerHTML = "";
+
+  const files = this.files;
+
+  for (let file of files) {
+
+    const img = document.createElement("img");
+
+    img.src = URL.createObjectURL(file);
+
+    img.style.width = "120px";
+    img.style.height = "120px";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "10px";
+
+    previewContainer.appendChild(img);
+  }
+
+});
+
+</script>

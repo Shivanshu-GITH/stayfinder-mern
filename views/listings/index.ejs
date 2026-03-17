@@ -7,10 +7,12 @@
   </div>
 
   <% if (allListings.length === 0) { %>
+
     <div class="text-center text-muted mt-5">
       <h5>No listings available yet</h5>
       <p>Be the first one to add a place</p>
     </div>
+
   <% } %>
 
   <div class="row g-4">
@@ -18,20 +20,39 @@
     <% for (let listing of allListings) { %>
 
       <div class="col-lg-4 col-md-6 col-sm-12">
-        <a href="/listings/<%= listing._id %>" class="listing-link">
+
+        <a href="/listings/<%= listing._id %>" class="listing-link text-decoration-none">
 
           <div class="card listing-card h-100">
 
             <div class="position-relative">
-              <img 
-                src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" 
-                class="card-img-top"
-                alt="listing_image"
-              />
+
+              <% if (listing.images && listing.images.length > 0) { %>
+
+                <img
+                  src="<%= listing.images[0].url %>"
+                  class="card-img-top"
+                  alt="listing image"
+                  style="height:250px; object-fit:cover;"
+                >
+
+              <% } else { %>
+
+                <img
+                  src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85"
+                  class="card-img-top"
+                  alt="default image"
+                  style="height:250px; object-fit:cover;"
+                >
+
+              <% } %>
+
               <div class="card-img-overlay overlay-effect"></div>
+
             </div>
 
             <div class="card-body">
+
               <h6 class="fw-semibold mb-1">
                 <%= listing.title %>
               </h6>
@@ -44,11 +65,13 @@
                 ₹ <%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %>
                 <span class="text-muted fw-normal"> / night</span>
               </p>
+
             </div>
 
           </div>
 
         </a>
+
       </div>
 
     <% } %>

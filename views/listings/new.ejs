@@ -7,91 +7,113 @@
       <div class="edit-card">
         <h2 class="edit-title">Create a New Listing</h2>
 
-        <form action="/listings" method="POST" class="needs-validation" novalidate>
+        <form 
+          action="/listings" 
+          method="POST" 
+          enctype="multipart/form-data"
+          class="needs-validation" 
+          novalidate
+        >
           
+          <!-- TITLE -->
           <div class="mb-4">
-            <label for="title" class="form-label">Title</label>
+            <label class="form-label">Title</label>
             <input 
               type="text" 
-              id="title" 
               name="listing[title]" 
-              placeholder="Give your place a catchy title"
               class="form-control"
+              placeholder="Give your place a catchy title"
               required
               minlength="5"
             />
-            <div class="invalid-feedback">Title must be at least 5 characters long.</div>
+            <div class="invalid-feedback">
+              Title must be at least 5 characters long.
+            </div>
           </div>
 
+          <!-- DESCRIPTION -->
           <div class="mb-4">
-            <label for="description" class="form-label">Description</label>
+            <label class="form-label">Description</label>
             <textarea 
-              id="description" 
               name="listing[description]" 
-              placeholder="Describe the vibe of your place..."
               class="form-control"
               rows="4"
+              placeholder="Describe the vibe of your place..."
               required
               minlength="20"
             ></textarea>
-            <div class="invalid-feedback">Description must be at least 20 characters long.</div>
+            <div class="invalid-feedback">
+              Description must be at least 20 characters long.
+            </div>
           </div>
 
+          <!-- MULTIPLE IMAGE UPLOAD -->
           <div class="mb-4">
-            <label for="image" class="form-label">Image Link</label>
+            <label class="form-label">Upload Images</label>
+
             <input 
-              type="url" 
-              id="image" 
-              name="listing[image][url]" 
-              placeholder="https://example.com/image.jpg"
+              type="file" 
+              id="images"
+              name="images"
+              multiple
               class="form-control"
-              pattern="https?://.+"
+              accept="image/*"
             />
-            <div class="invalid-feedback">Please enter a valid image URL.</div>
+
+            <!-- preview container -->
+            <div id="imagePreviewContainer" class="mt-3 d-flex flex-wrap gap-2"></div>
           </div>
 
           <div class="row">
+
+            <!-- PRICE -->
             <div class="mb-4 col-md-4">
-              <label for="price" class="form-label">Price (₹)</label>
+              <label class="form-label">Price (₹)</label>
               <input 
                 type="number" 
-                id="price" 
                 name="listing[price]" 
-                placeholder="e.g. 1200"
                 class="form-control"
+                placeholder="e.g. 1200"
                 required
                 min="1"
               />
-              <div class="invalid-feedback">Price must be greater than 0.</div>
+              <div class="invalid-feedback">
+                Price must be greater than 0.
+              </div>
             </div>
 
+            <!-- COUNTRY -->
             <div class="mb-4 col-md-8">
-              <label for="country" class="form-label">Country</label>
+              <label class="form-label">Country</label>
               <input 
                 type="text" 
-                id="country" 
                 name="listing[country]" 
-                placeholder="India"
                 class="form-control"
+                placeholder="India"
                 required
                 pattern="^[A-Za-z ]+$"
               />
-              <div class="invalid-feedback">Country name must contain letters only.</div>
+              <div class="invalid-feedback">
+                Country name must contain letters only.
+              </div>
             </div>
+
           </div>
 
+          <!-- LOCATION -->
           <div class="mb-4">
-            <label for="location" class="form-label">Location</label>
+            <label class="form-label">Location</label>
             <input 
               type="text" 
-              id="location" 
               name="listing[location]" 
-              placeholder="Jaipur, Rajasthan"
               class="form-control"
+              placeholder="Jaipur, Rajasthan"
               required
               pattern="^[A-Za-z ,]+$"
             />
-            <div class="invalid-feedback">Location should contain only letters and commas.</div>
+            <div class="invalid-feedback">
+              Location should contain only letters and commas.
+            </div>
           </div>
 
           <button class="btn save-btn w-100 mt-3">
@@ -104,3 +126,38 @@
     </div>
   </div>
 </div>
+
+<!-- ================= MULTIPLE IMAGE PREVIEW SCRIPT ================= -->
+
+<script>
+
+const imageInput = document.getElementById("images");
+const previewContainer = document.getElementById("imagePreviewContainer");
+
+let selectedFiles = [];
+
+imageInput.addEventListener("change", function () {
+
+  const files = Array.from(this.files);
+
+  files.forEach(file => {
+
+    // store file in array
+    selectedFiles.push(file);
+
+    const img = document.createElement("img");
+
+    img.src = URL.createObjectURL(file);
+
+    img.style.width = "120px";
+    img.style.height = "120px";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "10px";
+
+    previewContainer.appendChild(img);
+
+  });
+
+});
+
+</script>

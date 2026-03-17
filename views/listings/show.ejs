@@ -8,17 +8,83 @@
         <%= listing.title %>
       </h2>
 
+      <!-- ================= IMAGE CAROUSEL ================= -->
+
+      <% if (listing.images && listing.images.length > 0) { %>
+
+        <div id="listingCarousel" class="carousel slide mb-4" data-bs-ride="carousel" data-bs-interval="3000">
+
+          <!-- indicators -->
+          <div class="carousel-indicators">
+            <% listing.images.forEach((img, index) => { %>
+              <button
+                type="button"
+                data-bs-target="#listingCarousel"
+                data-bs-slide-to="<%= index %>"
+                class="<%= index === 0 ? 'active' : '' %>">
+              </button>
+            <% }) %>
+          </div>
+
+          <!-- images -->
+          <div class="carousel-inner">
+
+            <% listing.images.forEach((img, index) => { %>
+
+              <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+
+                <img
+                  src="<%= img.url %>"
+                  class="d-block w-100 rounded show-img"
+                  alt="listing image"
+                  style="height:420px; object-fit:cover;"
+                >
+
+              </div>
+
+            <% }) %>
+
+          </div>
+
+          <!-- previous button -->
+          <button
+            class="carousel-control-prev"
+            type="button"
+            data-bs-target="#listingCarousel"
+            data-bs-slide="prev">
+
+            <span class="carousel-control-prev-icon"></span>
+
+          </button>
+
+          <!-- next button -->
+          <button
+            class="carousel-control-next"
+            type="button"
+            data-bs-target="#listingCarousel"
+            data-bs-slide="next">
+
+            <span class="carousel-control-next-icon"></span>
+
+          </button>
+
+        </div>
+
+      <% } else { %>
+
+        <img
+          src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85"
+          class="img-fluid rounded show-img mb-3"
+        >
+
+      <% } %>
+
+      <!-- ================= LISTING CARD ================= -->
+
       <div class="card show-card listing-card">
 
-        <img 
-          src="<%= listing.image && listing.image.url 
-            ? listing.image.url 
-            : 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" 
-          class="card-img-top show-img" 
-          alt="listing_image"
-        />
-
         <div class="card-body show-body">
+
           <p class="host-text">
             Hosted by <span>StayFinder Host</span>
           </p>
@@ -28,8 +94,8 @@
           </p>
 
           <div class="show-price">
-            ₹ <%= listing.price 
-              ? listing.price.toLocaleString("en-IN") 
+            ₹ <%= listing.price
+              ? listing.price.toLocaleString("en-IN")
               : "N/A" %>
             <span>/ night</span>
           </div>
@@ -37,41 +103,48 @@
           <div class="show-location">
             <%= listing.location %>, <%= listing.country %>
           </div>
+
         </div>
       </div>
 
-      <!-- 🔐 EDIT / DELETE (ONLY OWNER) -->
+      <!-- ================= EDIT / DELETE ================= -->
+
       <% if (currentUser && listing.owner && listing.owner._id.equals(currentUser._id)) { %>
+
         <div class="show-actions mt-4 d-flex gap-2">
-          <a 
-            href="/listings/<%= listing._id %>/edit" 
-            class="btn edit-btn"
-          >
+
+          <a
+            href="/listings/<%= listing._id %>/edit"
+            class="btn edit-btn">
             Edit
           </a>
 
-          <form 
-            method="POST" 
-            action="/listings/<%= listing._id %>?_method=DELETE"
-          >
+          <form
+            method="POST"
+            action="/listings/<%= listing._id %>?_method=DELETE">
+
             <button class="btn delete-btn">
               Delete
             </button>
+
           </form>
+
         </div>
+
       <% } %>
 
       <hr class="my-5">
 
-      <!-- 🔐 ADD REVIEW -->
+      <!-- ================= ADD REVIEW ================= -->
+
       <% if (currentUser) { %>
+
         <h3 class="mb-3">Add a Review</h3>
 
-        <form 
-          action="/listings/<%= listing._id %>/reviews" 
+        <form
+          action="/listings/<%= listing._id %>/reviews"
           method="POST"
-          class="review-form mb-5"
-        >
+          class="review-form mb-5">
 
           <div class="mb-3">
             <label class="form-label rating-label">
@@ -80,13 +153,12 @@
 
             <div class="star-rating">
               <% for (let i = 5; i >= 1; i--) { %>
-                <input 
-                  type="radio" 
-                  id="star<%= i %>" 
-                  name="review[rating]" 
-                  value="<%= i %>" 
-                  required
-                />
+                <input
+                  type="radio"
+                  id="star<%= i %>"
+                  name="review[rating]"
+                  value="<%= i %>"
+                  required>
                 <label for="star<%= i %>">★</label>
               <% } %>
             </div>
@@ -101,44 +173,56 @@
               Your Review
             </label>
 
-            <textarea 
-              name="review[comment]" 
+            <textarea
+              name="review[comment]"
               class="form-control"
               rows="3"
               placeholder="Share your experience..."
-              required
-            ></textarea>
+              required>
+            </textarea>
           </div>
 
           <button class="btn btn-primary">
             Submit Review
           </button>
+
         </form>
 
       <% } else { %>
+
         <p class="text-muted mb-5">
           <a href="/login">Login</a> to add a review.
         </p>
+
       <% } %>
+
+      <!-- ================= REVIEWS ================= -->
 
       <h3 class="mb-3">Reviews</h3>
 
       <% if (listing.reviews.length === 0) { %>
+
         <p class="text-muted">
           No reviews yet. Be the first to review!
         </p>
+
       <% } %>
 
       <% for (let review of listing.reviews) { %>
+
         <div class="review-card">
 
           <div class="review-header">
             <div class="review-stars">
+
               <% for (let i = 1; i <= 5; i++) { %>
+
                 <span class="<%= i <= review.rating ? 'filled' : '' %>">
                   ★
                 </span>
+
               <% } %>
+
             </div>
           </div>
 
@@ -147,25 +231,30 @@
           </p>
 
           <% if (review.author) { %>
+
             <small class="review-author">
               — <%= review.author.username %>
             </small>
+
           <% } %>
 
-          <!-- 🔐 DELETE REVIEW (ONLY AUTHOR) -->
           <% if (currentUser && review.author && review.author._id.equals(currentUser._id)) { %>
-            <form 
+
+            <form
               method="POST"
               action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
-              class="mt-2"
-            >
+              class="mt-2">
+
               <button class="btn btn-sm btn-danger">
                 Delete
               </button>
+
             </form>
+
           <% } %>
 
         </div>
+
       <% } %>
 
     </div>

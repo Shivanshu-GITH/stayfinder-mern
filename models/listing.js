@@ -3,34 +3,37 @@ const Schema = mongoose.Schema;
 
 const listingSchema = new Schema(
   {
+    // listing title
     title: {
       type: String,
       required: true,
     },
 
+    // listing description
     description: String,
 
-    image: {
-      filename: {
-        type: String,
-        default: "listingimage",
+    // multiple images stored from cloudinary
+    images: [
+      {
+        url: String,
+        filename: String,
       },
-      url: {
-        type: String,
-        default:
-          "https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60",
-      },
-    },
+    ],
 
+    // price
     price: Number,
+
+    // location
     location: String,
     country: String,
 
+    // owner
     owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
 
+    // reviews
     reviews: [
       {
         type: Schema.Types.ObjectId,
@@ -40,8 +43,22 @@ const listingSchema = new Schema(
   },
   {
     strictPopulate: false,
+
+    // important so virtuals work in EJS
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
+// generate thumbnails for all images
+listingSchema.virtual("imageThumbnails").get(function () {
+  if (!this.images) return [];
+
+  return this.images.map((img) =>
+    img.url.replace("/upload", "/upload/w_300")
+  );
+});
+
 const Listing = mongoose.model("Listing", listingSchema);
+
 module.exports = Listing;
