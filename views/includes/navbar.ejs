@@ -20,7 +20,15 @@
         <% } %>
 
         <% if (currentUser) { %>
-          <!-- Add Listing (ONLY if logged in) -->
+
+          <!-- Dashboard -->
+          <li class="nav-item">
+            <a class="nav-link nav-hover" href="/dashboard">
+              Dashboard
+            </a>
+          </li>
+
+          <!-- Add Listing -->
           <li class="nav-item">
             <a class="btn add-listing-btn" href="/listings/new">
               Add Listing
@@ -42,6 +50,7 @@
           </li>
 
         <% } else { %>
+
           <!-- Login -->
           <li class="nav-item">
             <a class="nav-link nav-hover" href="/login">Login</a>
@@ -53,6 +62,7 @@
               Sign Up
             </a>
           </li>
+
         <% } %>
 
       </ul>

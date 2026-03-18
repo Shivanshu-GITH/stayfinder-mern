@@ -7,7 +7,7 @@
       <div class="edit-card">
         <h2 class="edit-title">Edit Listing</h2>
 
-        <!-- CURRENT IMAGES (OUTSIDE MAIN FORM) -->
+        <!-- CURRENT IMAGES -->
         <div class="mb-4">
           <label class="form-label">Current Images</label>
 
@@ -24,7 +24,6 @@
                     style="width:120px;height:120px;object-fit:cover;border-radius:10px;"
                   >
 
-                  <!-- DELETE IMAGE FORM -->
                   <form
                     action="/listings/<%= listing._id %>/images?_method=DELETE"
                     method="POST"
@@ -39,17 +38,7 @@
 
                     <button
                       type="submit"
-                      style="
-                        background:red;
-                        color:white;
-                        border:none;
-                        border-radius:50%;
-                        width:26px;
-                        height:26px;
-                        font-size:16px;
-                        line-height:20px;
-                        cursor:pointer;
-                      ">
+                      style="background:red;color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:16px;cursor:pointer;">
                       ×
                     </button>
 
@@ -68,8 +57,7 @@
           </div>
         </div>
 
-
-        <!-- MAIN EDIT FORM STARTS HERE -->
+        <!-- MAIN FORM -->
         <form action="/listings/<%= listing._id %>?_method=PUT"
               method="POST"
               enctype="multipart/form-data"
@@ -87,9 +75,6 @@
               required
               minlength="5"
             >
-            <div class="invalid-feedback">
-              Title must be at least 5 characters long.
-            </div>
           </div>
 
           <!-- DESCRIPTION -->
@@ -101,12 +86,44 @@
               rows="4"
               required
               minlength="20"><%= listing.description %></textarea>
-            <div class="invalid-feedback">
-              Description must be at least 20 characters long.
-            </div>
           </div>
 
-          <!-- UPLOAD NEW IMAGES -->
+          <!-- CATEGORY (NEW) -->
+          <div class="mb-4">
+            <label class="form-label">Category</label>
+
+            <% const categories = [
+              "Apartment",
+              "House",
+              "Villa",
+              "Hotel",
+              "Hostel",
+              "Resort",
+              "Cottage",
+              "Cabin",
+              "Farm Stay",
+              "Camping",
+              "Luxury",
+              "Beachfront",
+              "Mountain View",
+              "City Stay"
+            ]; %>
+
+            <select name="listing[category]" class="form-control" required>
+
+              <% for (let cat of categories) { %>
+
+                <option value="<%= cat %>"
+                  <%= listing.category === cat ? "selected" : "" %>>
+                  <%= cat %>
+                </option>
+
+              <% } %>
+
+            </select>
+          </div>
+
+          <!-- IMAGE UPLOAD -->
           <div class="mb-4">
 
             <label class="form-label">Upload New Images</label>
@@ -119,10 +136,6 @@
               class="form-control"
               accept="image/*"
             >
-
-            <small class="text-muted">
-              Uploading new images will add them to the listing.
-            </small>
 
             <div id="imagePreviewContainer"
                  class="mt-3 d-flex flex-wrap gap-2">
@@ -141,11 +154,7 @@
                 value="<%= listing.price %>"
                 class="form-control"
                 required
-                min="1"
               >
-              <div class="invalid-feedback">
-                Price must be greater than 0.
-              </div>
             </div>
 
             <!-- COUNTRY -->
@@ -157,11 +166,7 @@
                 value="<%= listing.country %>"
                 class="form-control"
                 required
-                pattern="^[A-Za-z ]+$"
               >
-              <div class="invalid-feedback">
-                Country name must contain letters only.
-              </div>
             </div>
 
           </div>
@@ -175,11 +180,7 @@
               value="<%= listing.location %>"
               class="form-control"
               required
-              pattern="^[A-Za-z ,]+$"
             >
-            <div class="invalid-feedback">
-              Location should contain only letters and commas.
-            </div>
           </div>
 
           <button class="btn save-btn w-100 mt-3">
@@ -194,34 +195,23 @@
   </div>
 </div>
 
-
-<!-- IMAGE PREVIEW SCRIPT -->
-
+<!-- IMAGE PREVIEW -->
 <script>
-
 const imageInput = document.getElementById("images");
 const previewContainer = document.getElementById("imagePreviewContainer");
 
 imageInput.addEventListener("change", function () {
-
   previewContainer.innerHTML = "";
 
-  const files = this.files;
-
-  for (let file of files) {
-
+  Array.from(this.files).forEach(file => {
     const img = document.createElement("img");
-
     img.src = URL.createObjectURL(file);
-
     img.style.width = "120px";
     img.style.height = "120px";
     img.style.objectFit = "cover";
     img.style.borderRadius = "10px";
-
     previewContainer.appendChild(img);
-  }
-
+  });
 });
-
 </script>
+

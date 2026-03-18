@@ -27,14 +27,36 @@ const listingSchema = new Schema(
     location: String,
     country: String,
 
-    //(FOR MAP)
+    // ================= CATEGORY (BOOKING BASED) =================
+    category: {
+      type: String,
+      enum: [
+        "Apartment",
+        "House",
+        "Villa",
+        "Hotel",
+        "Hostel",
+        "Resort",
+        "Cottage",
+        "Cabin",
+        "Farm Stay",
+        "Camping",
+        "Luxury",
+        "Beachfront",
+        "Mountain View",
+        "City Stay"
+      ],
+      default: "Apartment",
+    },
+
+    // ================= MAP =================
     geometry: {
       type: {
         type: String,
         enum: ["Point"],
       },
       coordinates: {
-        type: [Number], // [longitude, latitude]
+        type: [Number],
       },
     },
 
@@ -54,14 +76,15 @@ const listingSchema = new Schema(
   },
   {
     strictPopulate: false,
-
-    // important so virtuals work in EJS
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
 
-// generate thumbnails for all images
+// index for search
+listingSchema.index({ title: "text", location: "text" });
+
+// thumbnails
 listingSchema.virtual("imageThumbnails").get(function () {
   if (!this.images) return [];
 

@@ -63,7 +63,7 @@
 
       <% } %>
 
-      <!-- ================= 🗺️ MAP ================= -->
+      <!-- ================= MAP ================= -->
 
       <div id="map" style="height: 400px; border-radius: 12px; margin-bottom: 25px;"></div>
 
@@ -91,6 +91,40 @@
           <div class="show-location">
             <%= listing.location %>, <%= listing.country %>
           </div>
+
+          <!-- ================= WISHLIST BUTTON ================= -->
+
+          <% if (currentUser) { %>
+
+            <div class="mt-3">
+
+              <% if (isInWishlist) { %>
+
+                <form method="POST" action="/listings/<%= listing._id %>/wishlist?_method=DELETE">
+                  <button class="btn btn-outline-danger w-100">
+                    Remove from Wishlist
+                  </button>
+                </form>
+
+              <% } else { %>
+
+                <form method="POST" action="/listings/<%= listing._id %>/wishlist">
+                  <button class="btn btn-dark w-100">
+                    Add to Wishlist
+                  </button>
+                </form>
+
+              <% } %>
+
+            </div>
+
+          <% } else { %>
+
+            <p class="text-muted mt-3">
+              <a href="/login">Login</a> to save this listing
+            </p>
+
+          <% } %>
 
         </div>
       </div>

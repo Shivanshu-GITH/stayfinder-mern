@@ -136,16 +136,40 @@ app.get("/logout", (req, res, next) => {
   });
 });
 
-// ================= LISTINGS =================
-
+// ================= SEARCH + FILTER =================
 app.get("/listings", wrapAsync(async (req, res) => {
-  const allListings = await Listing.find({});
-  res.render("listings/index", { allListings });
-}));
+  const { search, minPrice, maxPrice, category, sort } = req.query;
 
-app.get("/listings/new", isLoggedIn, (req, res) => {
-  res.render("listings/new");
-});
+  let query = {};
+
+  if (search && search.trim() !== "") {
+    query.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { location: { $regex: search, $options: "i" } }
+    ];
+  }
+
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) query.price.$gte = Number(minPrice);
+    if (maxPrice) query.price.$lte = Number(maxPrice);
+  }
+
+  if (category) {
+    query.category = category;
+  }
+
+  let sortOption = {};
+  if (sort === "low") sortOption.price = 1;
+  if (sort === "high") sortOption.price = -1;
+
+  const allListings = await Listing.find(query).sort(sortOption);
+
+  res.render("listings/index", {
+    allListings,
+    query: req.query
+  });
+}));
 
 // ================= FLEXIBLE GEOCODING =================
 async function getCoordinates(location) {
@@ -157,10 +181,7 @@ async function getCoordinates(location) {
     });
 
     if (response.data.length === 0) {
-      return {
-        lat: 28.6139,
-        lon: 77.2090
-      };
+      return { lat: 28.6139, lon: 77.2090 };
     }
 
     return {
@@ -169,10 +190,7 @@ async function getCoordinates(location) {
     };
 
   } catch (err) {
-    return {
-      lat: 28.6139,
-      lon: 77.2090
-    };
+    return { lat: 28.6139, lon: 77.2090 };
   }
 }
 
@@ -186,17 +204,7 @@ app.post("/listings",
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
 
-    let coords;
-
-    // priority: map click coordinates
-    if (req.body.listing.lat && req.body.listing.lng) {
-      coords = {
-        lat: parseFloat(req.body.listing.lat),
-        lon: parseFloat(req.body.listing.lng)
-      };
-    } else {
-      coords = await getCoordinates(req.body.listing.location);
-    }
+    const coords = await getCoordinates(req.body.listing.location);
 
     newListing.geometry = {
       type: "Point",
@@ -219,6 +227,7 @@ app.post("/listings",
 
 // ================= SHOW =================
 app.get("/listings/:id", wrapAsync(async (req, res) => {
+
   const listing = await Listing.findById(req.params.id)
     .populate({
       path: "reviews",
@@ -228,10 +237,18 @@ app.get("/listings/:id", wrapAsync(async (req, res) => {
 
   if (!listing) throw new ExpressError("Listing not found", 404);
 
-  res.render("listings/show", { listing });
+  let isInWishlist = false;
+
+  if (req.user) {
+    const user = await User.findById(req.user._id);
+    isInWishlist = user.wishlist.includes(listing._id);
+  }
+
+  res.render("listings/show", { listing, isInWishlist });
 }));
 
 // ================= EDIT PAGE =================
+
 app.get(
   "/listings/:id/edit",
   isLoggedIn,
@@ -297,17 +314,11 @@ app.delete("/listings/:id",
 );
 
 // ================= REVIEWS =================
-
 app.post("/listings/:id/reviews",
   isLoggedIn,
   wrapAsync(async (req, res) => {
 
     const listing = await Listing.findById(req.params.id);
-
-    if (!listing) {
-      req.flash("error", "Listing not found");
-      return res.redirect("/listings");
-    }
 
     const review = new Review(req.body.review);
     review.author = req.user._id;
@@ -322,21 +333,66 @@ app.post("/listings/:id/reviews",
   })
 );
 
-app.delete("/listings/:id/reviews/:reviewId",
+// ================= WISHLIST =================
+app.post("/listings/:id/wishlist", isLoggedIn, wrapAsync(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user.wishlist.includes(req.params.id)) {
+    user.wishlist.push(req.params.id);
+    await user.save();
+  }
+
+  res.redirect(`/listings/${req.params.id}`);
+}));
+
+app.delete("/listings/:id/wishlist", isLoggedIn, wrapAsync(async (req, res) => {
+  await User.findByIdAndUpdate(req.user._id, {
+    $pull: { wishlist: req.params.id }
+  });
+
+  res.redirect(`/listings/${req.params.id}`);
+}));
+
+app.get("/wishlist", isLoggedIn, wrapAsync(async (req, res) => {
+  const user = await User.findById(req.user._id).populate("wishlist");
+  res.render("users/wishlist", { listings: user.wishlist });
+}));
+
+// DASHBOARD
+
+app.get("/dashboard",
   isLoggedIn,
-  isReviewAuthor,
   wrapAsync(async (req, res) => {
 
-    const { id, reviewId } = req.params;
+    const user = await User.findById(req.user._id)
+      .populate("wishlist");
 
-    await Listing.findByIdAndUpdate(id, {
-      $pull: { reviews: reviewId }
+    // Reviews written
+    const reviewCount = await Review.countDocuments({
+      author: req.user._id
     });
 
-    await Review.findByIdAndDelete(reviewId);
+    // Listings created
+    const userListings = await Listing.find({
+      owner: req.user._id
+    });
 
-    req.flash("success", "Review deleted");
-    res.redirect(`/listings/${id}`);
+    const listingCount = userListings.length;
+
+    // Reviews received
+    let reviewsReceived = 0;
+    userListings.forEach(listing => {
+      reviewsReceived += listing.reviews.length;
+    });
+
+    res.render("users/dashboard", {
+      user,
+      listings: user.wishlist,
+      reviewCount,
+      listingCount,
+      reviewsReceived,
+      userListings
+    });
   })
 );
 

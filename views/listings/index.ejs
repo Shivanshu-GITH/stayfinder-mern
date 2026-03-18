@@ -1,3 +1,4 @@
+```ejs
 <% layout("/layouts/boilerplate") %>
 
 <div class="container mt-5 mb-5">
@@ -6,18 +7,94 @@
     <h2 class="fw-semibold">Explore Listings</h2>
   </div>
 
-  <!--  MAP CONTAINER -->
+  <!-- SEARCH + FILTER BAR -->
+  <form method="GET" action="/listings" class="row g-3 mb-4">
+
+    <!-- Search -->
+    <div class="col-md-3">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search location or title"
+        value="<%= query?.search || '' %>"
+      >
+    </div>
+
+    <!-- Min Price -->
+    <div class="col-md-2">
+      <input 
+        type="number" 
+        name="minPrice" 
+        class="form-control" 
+        placeholder="Min Price"
+        value="<%= query?.minPrice || '' %>"
+      >
+    </div>
+
+    <!-- Max Price -->
+    <div class="col-md-2">
+      <input 
+        type="number" 
+        name="maxPrice" 
+        class="form-control" 
+        placeholder="Max Price"
+        value="<%= query?.maxPrice || '' %>"
+      >
+    </div>
+
+    <!-- CATEGORY (FIXED) -->
+    <div class="col-md-2">
+      <select name="category" class="form-select">
+        <option value="">All Categories</option>
+
+        <option value="Apartment" <%= query?.category === "Apartment" ? "selected" : "" %>>Apartment</option>
+        <option value="House" <%= query?.category === "House" ? "selected" : "" %>>House</option>
+        <option value="Villa" <%= query?.category === "Villa" ? "selected" : "" %>>Villa</option>
+        <option value="Hotel" <%= query?.category === "Hotel" ? "selected" : "" %>>Hotel</option>
+        <option value="Hostel" <%= query?.category === "Hostel" ? "selected" : "" %>>Hostel</option>
+        <option value="Resort" <%= query?.category === "Resort" ? "selected" : "" %>>Resort</option>
+        <option value="Cottage" <%= query?.category === "Cottage" ? "selected" : "" %>>Cottage</option>
+        <option value="Cabin" <%= query?.category === "Cabin" ? "selected" : "" %>>Cabin</option>
+        <option value="Farm Stay" <%= query?.category === "Farm Stay" ? "selected" : "" %>>Farm Stay</option>
+        <option value="Camping" <%= query?.category === "Camping" ? "selected" : "" %>>Camping</option>
+        <option value="Luxury" <%= query?.category === "Luxury" ? "selected" : "" %>>Luxury</option>
+        <option value="Beachfront" <%= query?.category === "Beachfront" ? "selected" : "" %>>Beachfront</option>
+        <option value="Mountain View" <%= query?.category === "Mountain View" ? "selected" : "" %>>Mountain View</option>
+        <option value="City Stay" <%= query?.category === "City Stay" ? "selected" : "" %>>City Stay</option>
+
+      </select>
+    </div>
+
+    <!-- Sort -->
+    <div class="col-md-2">
+      <select name="sort" class="form-select">
+        <option value="">Sort</option>
+        <option value="low" <%= query?.sort === "low" ? "selected" : "" %>>Price: Low to High</option>
+        <option value="high" <%= query?.sort === "high" ? "selected" : "" %>>Price: High to Low</option>
+      </select>
+    </div>
+
+    <!-- Button -->
+    <div class="col-md-1 d-grid">
+      <button class="btn btn-dark">Go</button>
+    </div>
+
+  </form>
+
+  <!-- MAP -->
   <div id="map" style="height: 500px; width: 100%; margin-bottom: 30px; border-radius: 12px;"></div>
 
   <% if (allListings.length === 0) { %>
 
     <div class="text-center text-muted mt-5">
-      <h5>No listings available yet</h5>
-      <p>Be the first one to add a place</p>
+      <h5>No listings found</h5>
+      <p>Try adjusting your filters</p>
     </div>
 
   <% } %>
 
+  <!-- LISTINGS -->
   <div class="row g-4">
 
     <% for (let listing of allListings) { %>
@@ -35,7 +112,6 @@
                 <img
                   src="<%= listing.images[0].url %>"
                   class="card-img-top"
-                  alt="listing image"
                   style="height:250px; object-fit:cover;"
                 >
 
@@ -44,13 +120,10 @@
                 <img
                   src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85"
                   class="card-img-top"
-                  alt="default image"
                   style="height:250px; object-fit:cover;"
                 >
 
               <% } %>
-
-              <div class="card-img-overlay overlay-effect"></div>
 
             </div>
 
@@ -69,6 +142,11 @@
                 <span class="text-muted fw-normal"> / night</span>
               </p>
 
+              <!-- CATEGORY TAG (NEW) -->
+              <span class="badge bg-light text-dark mt-2">
+                <%= listing.category %>
+              </span>
+
             </div>
 
           </div>
@@ -83,8 +161,7 @@
 
 </div>
 
-<!--  PASS DATA TO JS -->
-
+<!-- DATA -->
 <script id="listing-data" type="application/json">
   <%- JSON.stringify(allListings) %>
 </script>
@@ -94,3 +171,4 @@
 </script>
 
 <script src="/js/map.js"></script>
+

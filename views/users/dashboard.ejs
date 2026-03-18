@@ -1,0 +1,174 @@
+<% layout("/layouts/boilerplate") %>
+
+<link rel="stylesheet" href="/css/dashboard.css">
+
+<div class="container dashboard-container">
+
+  <div class="dashboard-grid">
+
+    <!-- ================= SIDEBAR ================= -->
+    <div class="profile-card">
+
+      <div class="profile-avatar">
+        <%= user.username.charAt(0).toUpperCase() %>
+      </div>
+
+      <div class="profile-name">
+        <%= user.username %>
+      </div>
+
+      <div class="profile-email">
+        <%= user.email %>
+      </div>
+
+    </div>
+
+    <!-- ================= MAIN ================= -->
+    <div class="dashboard-main">
+
+      <!-- ================= STATS ================= -->
+      <div class="stats-row">
+
+        <div class="stats-card">
+          <div class="stats-number"><%= listings.length %></div>
+          <div class="stats-label">Saved Listings</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-number"><%= listingCount %></div>
+          <div class="stats-label">Your Listings</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-number"><%= reviewCount %></div>
+          <div class="stats-label">Reviews Given</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-number"><%= reviewsReceived %></div>
+          <div class="stats-label">Reviews Received</div>
+        </div>
+
+      </div>
+
+      <!-- ================= WISHLIST ================= -->
+      <div class="section-header">
+        <h5 class="section-title">Your Wishlist</h5>
+      </div>
+
+      <% if (listings.length === 0) { %>
+
+        <div class="empty-state">
+          <h6>No saved listings yet</h6>
+          <p class="text-muted">Start exploring and save your favorites</p>
+          <a href="/listings" class="btn btn-dark">Explore</a>
+        </div>
+
+      <% } %>
+
+      <div class="wishlist-grid mb-5">
+
+        <% for (let listing of listings) { %>
+
+          <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+
+            <div class="dashboard-card">
+
+              <img 
+                src="<%= listing.images[0]?.url || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" 
+                class="dashboard-img"
+              >
+
+              <div class="dashboard-card-body">
+
+                <div class="dashboard-title">
+                  <%= listing.title %>
+                </div>
+
+                <div class="dashboard-location">
+                  <%= listing.location %>
+                </div>
+
+                <div class="dashboard-price">
+                  ₹ <%= listing.price?.toLocaleString("en-IN") %>
+                  <span class="text-muted fw-normal">/ night</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </a>
+
+        <% } %>
+
+      </div>
+
+      <!-- ================= MY LISTINGS ================= -->
+      <div class="section-header">
+        <h5 class="section-title">Your Listings</h5>
+      </div>
+
+      <% if (userListings.length === 0) { %>
+
+        <div class="empty-state">
+          <h6>No listings created yet</h6>
+          <p class="text-muted">Start hosting your place</p>
+          <a href="/listings/new" class="btn btn-dark">Add Listing</a>
+        </div>
+
+      <% } %>
+
+      <div class="wishlist-grid">
+
+        <% for (let listing of userListings) { %>
+
+          <div class="dashboard-card">
+
+            <img 
+              src="<%= listing.images[0]?.url || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>" 
+              class="dashboard-img"
+            >
+
+            <div class="dashboard-card-body">
+
+              <div class="dashboard-title">
+                <%= listing.title %>
+              </div>
+
+              <div class="dashboard-location">
+                <%= listing.location %>
+              </div>
+
+              <div class="dashboard-price mb-2">
+                ₹ <%= listing.price?.toLocaleString("en-IN") %>
+              </div>
+
+              <!-- ACTION BUTTONS -->
+              <div class="d-flex gap-2">
+
+                <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-outline-dark w-50">
+                  Edit
+                </a>
+
+                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="w-50">
+                  <button class="btn btn-sm btn-danger w-100">
+                    Delete
+                  </button>
+                </form>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        <% } %>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
