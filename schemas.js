@@ -2,9 +2,6 @@ const Joi = require("joi");
 
 // ================= LISTING VALIDATION =================
 
-// image validation removed because image now comes from multer (req.file)
-// not from req.body
-
 module.exports.listingSchema = Joi.object({
   listing: Joi.object({
     title: Joi.string().required(),
@@ -16,6 +13,11 @@ module.exports.listingSchema = Joi.object({
     location: Joi.string().required(),
 
     country: Joi.string().required(),
+
+    // ALLOW COORDINATES (NEW)
+    lat: Joi.number().optional(),
+
+    lng: Joi.number().optional(),
   }).required(),
 });
 
@@ -28,4 +30,3 @@ module.exports.reviewSchema = Joi.object({
     comment: Joi.string().required(),
   }).required(),
 });
-

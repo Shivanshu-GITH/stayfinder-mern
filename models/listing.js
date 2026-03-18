@@ -27,6 +27,17 @@ const listingSchema = new Schema(
     location: String,
     country: String,
 
+    //(FOR MAP)
+    geometry: {
+      type: {
+        type: String,
+        enum: ["Point"],
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+      },
+    },
+
     // owner
     owner: {
       type: Schema.Types.ObjectId,

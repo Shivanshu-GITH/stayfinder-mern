@@ -6,6 +6,9 @@
     <h2 class="fw-semibold">Explore Listings</h2>
   </div>
 
+  <!--  MAP CONTAINER -->
+  <div id="map" style="height: 500px; width: 100%; margin-bottom: 30px; border-radius: 12px;"></div>
+
   <% if (allListings.length === 0) { %>
 
     <div class="text-center text-muted mt-5">
@@ -79,3 +82,15 @@
   </div>
 
 </div>
+
+<!--  PASS DATA TO JS -->
+
+<script id="listing-data" type="application/json">
+  <%- JSON.stringify(allListings) %>
+</script>
+
+<script>
+  const listings = JSON.parse(document.getElementById("listing-data").textContent);
+</script>
+
+<script src="/js/map.js"></script>

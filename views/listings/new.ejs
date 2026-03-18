@@ -26,9 +26,6 @@
               required
               minlength="5"
             />
-            <div class="invalid-feedback">
-              Title must be at least 5 characters long.
-            </div>
           </div>
 
           <!-- DESCRIPTION -->
@@ -42,12 +39,9 @@
               required
               minlength="20"
             ></textarea>
-            <div class="invalid-feedback">
-              Description must be at least 20 characters long.
-            </div>
           </div>
 
-          <!-- MULTIPLE IMAGE UPLOAD -->
+          <!-- IMAGE -->
           <div class="mb-4">
             <label class="form-label">Upload Images</label>
 
@@ -60,7 +54,6 @@
               accept="image/*"
             />
 
-            <!-- preview container -->
             <div id="imagePreviewContainer" class="mt-3 d-flex flex-wrap gap-2"></div>
           </div>
 
@@ -73,13 +66,9 @@
                 type="number" 
                 name="listing[price]" 
                 class="form-control"
-                placeholder="e.g. 1200"
                 required
                 min="1"
               />
-              <div class="invalid-feedback">
-                Price must be greater than 0.
-              </div>
             </div>
 
             <!-- COUNTRY -->
@@ -91,11 +80,7 @@
                 class="form-control"
                 placeholder="India"
                 required
-                pattern="^[A-Za-z ]+$"
               />
-              <div class="invalid-feedback">
-                Country name must contain letters only.
-              </div>
             </div>
 
           </div>
@@ -105,15 +90,25 @@
             <label class="form-label">Location</label>
             <input 
               type="text" 
+              id="locationInput"
               name="listing[location]" 
               class="form-control"
-              placeholder="Jaipur, Rajasthan"
+              placeholder="Click on map or type address"
               required
-              pattern="^[A-Za-z ,]+$"
             />
-            <div class="invalid-feedback">
-              Location should contain only letters and commas.
-            </div>
+          </div>
+
+          <!-- HIDDEN COORDINATES -->
+          <input type="hidden" name="listing[lat]" id="lat">
+          <input type="hidden" name="listing[lng]" id="lng">
+
+          <!-- MAP -->
+          <div class="mb-4">
+            <label class="form-label">Select Location on Map</label>
+            <div id="map" style="height: 400px; border-radius: 10px;"></div>
+            <small class="text-muted">
+              Click anywhere on map to set exact location
+            </small>
           </div>
 
           <button class="btn save-btn w-100 mt-3">
@@ -127,37 +122,78 @@
   </div>
 </div>
 
-<!-- ================= MULTIPLE IMAGE PREVIEW SCRIPT ================= -->
-
+<!-- IMAGE PREVIEW -->
 <script>
-
 const imageInput = document.getElementById("images");
 const previewContainer = document.getElementById("imagePreviewContainer");
 
-let selectedFiles = [];
-
 imageInput.addEventListener("change", function () {
-
-  const files = Array.from(this.files);
-
-  files.forEach(file => {
-
-    // store file in array
-    selectedFiles.push(file);
-
+  previewContainer.innerHTML = "";
+  Array.from(this.files).forEach(file => {
     const img = document.createElement("img");
-
     img.src = URL.createObjectURL(file);
-
     img.style.width = "120px";
     img.style.height = "120px";
     img.style.objectFit = "cover";
     img.style.borderRadius = "10px";
-
     previewContainer.appendChild(img);
+  });
+});
+</script>
 
+<!-- MAP + REVERSE GEOCODING -->
+<script>
+window.addEventListener("load", () => {
+
+  if (typeof L === "undefined") return;
+
+  const map = L.map('map').setView([28.6139, 77.2090], 5);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: "© OpenStreetMap contributors"
+  }).addTo(map);
+
+  let marker;
+
+  map.on("click", async function (e) {
+    const { lat, lng } = e.latlng;
+
+    if (marker) {
+      map.removeLayer(marker);
+    }
+
+    marker = L.marker([lat, lng]).addTo(map);
+
+    document.getElementById("lat").value = lat;
+    document.getElementById("lng").value = lng;
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+      );
+
+      const data = await res.json();
+
+      if (data && data.display_name) {
+        document.getElementById("locationInput").value = data.display_name;
+      }
+
+    } catch (err) {
+      console.error("Reverse geocoding failed");
+    }
   });
 
 });
+</script>
 
+<!-- PREVENT BAD SUBMIT -->
+<script>
+document.querySelector("form").addEventListener("submit", function (e) {
+  const location = document.getElementById("locationInput").value;
+
+  if (!location || location.trim().length < 3) {
+    e.preventDefault();
+    alert("Please select a valid location from the map");
+  }
+});
 </script>
