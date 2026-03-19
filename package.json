@@ -1,7 +1,7 @@
 {
   "name": "stayfinder-mern",
   "version": "1.0.0",
-  "description": "",
+  "description": "A full-stack Airbnb-inspired vacation rental platform — list, discover, and review properties with image uploads, interactive maps, and user authentication.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -11,8 +11,19 @@
     "type": "git",
     "url": "git+https://github.com/Shivanshu-GITH/stayfinder-mern.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "mern",
+    "express",
+    "mongodb",
+    "ejs",
+    "airbnb-clone",
+    "vacation-rental",
+    "cloudinary",
+    "passport",
+    "leaflet",
+    "full-stack"
+  ],
+  "author": "Shivanshu <https://github.com/Shivanshu-GITH>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Shivanshu-GITH/stayfinder-mern/issues"
