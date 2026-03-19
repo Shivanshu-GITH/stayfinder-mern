@@ -1,34 +1,118 @@
 .hero {
-    height: 90vh;
+    height: 92vh;
     background: linear-gradient(
-        rgba(0, 0, 0, 0.6),
-        rgba(0, 0, 0, 0.6)
+        rgba(0, 0, 0, 0.55),
+        rgba(0, 0, 0, 0.55)
     ),
     url("https://images.unsplash.com/photo-1505691938895-1758d7feb511")
     center/cover no-repeat;
-
     display: flex;
     justify-content: center;
     align-items: center;
     color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.2) 0%,
+        rgba(0,0,0,0.6) 100%
+    );
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.9s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hero-title {
-    font-size: 3.5rem;
-    font-weight: bold;
+    font-size: 3.8rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
 }
 
 .hero-subtitle {
-    font-size: 1.3rem;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
+    font-size: 1.25rem;
+    margin-top: 1.2rem;
+    margin-bottom: 2.5rem;
+    color: rgba(255,255,255,0.88);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
 }
 
 .hero-buttons .btn {
-    padding: 12px 28px;
-    font-size: 1.1rem;
+    padding: 13px 32px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.hero-buttons .btn-primary {
+    background: linear-gradient(135deg, #ff385c, #e03150);
+    border: none;
+    box-shadow: 0 8px 25px rgba(255, 56, 92, 0.4);
+}
+
+.hero-buttons .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(255, 56, 92, 0.5);
+}
+
+.hero-buttons .btn-outline-light:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.15);
+}
+
+.features {
+    padding: 5rem 0;
+    background: #fff;
 }
 
 .features h4 {
     margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #222;
+}
+
+.features p {
+    color: #6c757d;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    max-width: 260px;
+    margin: 0 auto;
+}
+
+.features .col-md-4 {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.features .col-md-4:hover {
+    background: #fafafa;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }

@@ -14,7 +14,24 @@ module.exports.listingSchema = Joi.object({
 
     country: Joi.string().required(),
 
-    // ALLOW COORDINATES (NEW)
+    category: Joi.string().valid(
+      "Apartment",
+      "House",
+      "Villa",
+      "Hotel",
+      "Hostel",
+      "Resort",
+      "Cottage",
+      "Cabin",
+      "Farm Stay",
+      "Camping",
+      "Luxury",
+      "Beachfront",
+      "Mountain View",
+      "City Stay"
+    ).optional(),
+
+    // ALLOW COORDINATES
     lat: Joi.number().optional(),
 
     lng: Joi.number().optional(),

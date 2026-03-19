@@ -194,6 +194,11 @@ async function getCoordinates(location) {
   }
 }
 
+// ================= NEW LISTING PAGE =================
+app.get("/listings/new", isLoggedIn, (req, res) => {
+  res.render("listings/new");
+});
+
 // ================= CREATE =================
 app.post("/listings",
   isLoggedIn,
@@ -248,7 +253,6 @@ app.get("/listings/:id", wrapAsync(async (req, res) => {
 }));
 
 // ================= EDIT PAGE =================
-
 app.get(
   "/listings/:id/edit",
   isLoggedIn,
@@ -294,6 +298,27 @@ app.put("/listings/:id",
   })
 );
 
+// ================= DELETE SINGLE IMAGE =================
+app.delete("/listings/:id/images",
+  isLoggedIn,
+  isListingOwner,
+  wrapAsync(async (req, res) => {
+    const { id } = req.params;
+    const { filename } = req.body;
+
+    // Delete from Cloudinary
+    await cloudinary.uploader.destroy(filename);
+
+    // Remove from DB
+    await Listing.findByIdAndUpdate(id, {
+      $pull: { images: { filename: filename } }
+    });
+
+    req.flash("success", "Image deleted successfully");
+    res.redirect(`/listings/${id}/edit`);
+  })
+);
+
 // ================= DELETE =================
 app.delete("/listings/:id",
   isLoggedIn,
@@ -333,6 +358,21 @@ app.post("/listings/:id/reviews",
   })
 );
 
+// ================= DELETE REVIEW =================
+app.delete("/listings/:id/reviews/:reviewId",
+  isLoggedIn,
+  isReviewAuthor,
+  wrapAsync(async (req, res) => {
+    const { id, reviewId } = req.params;
+
+    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+    await Review.findByIdAndDelete(reviewId);
+
+    req.flash("success", "Review deleted successfully");
+    res.redirect(`/listings/${id}`);
+  })
+);
+
 // ================= WISHLIST =================
 app.post("/listings/:id/wishlist", isLoggedIn, wrapAsync(async (req, res) => {
   const user = await User.findById(req.user._id);
@@ -358,8 +398,7 @@ app.get("/wishlist", isLoggedIn, wrapAsync(async (req, res) => {
   res.render("users/wishlist", { listings: user.wishlist });
 }));
 
-// DASHBOARD
-
+// ================= DASHBOARD =================
 app.get("/dashboard",
   isLoggedIn,
   wrapAsync(async (req, res) => {
