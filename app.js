@@ -443,8 +443,10 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
   const { statusCode = 500, message = "Something went wrong" } = err;
-
   res.status(statusCode).render("error", {
     statusCode,
     message
