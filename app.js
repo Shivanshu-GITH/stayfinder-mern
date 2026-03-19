@@ -1,4 +1,6 @@
 // ================= REQUIRED PACKAGES =================
+const connectMongo = require("connect-mongo");
+const MongoStore = connectMongo.default || connectMongo;
 require("dotenv").config();
 
 const express = require("express");
@@ -36,7 +38,7 @@ const {
   isReviewAuthor,
 } = require("./middleware");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/stayfinder";
+const MONGO_URL = process.env.MONGO_URL;
 
 // ================= DB =================
 mongoose
@@ -54,14 +56,19 @@ app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // ================= SESSION =================
+
 app.use(
   session({
-    secret: "stayfindersecret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URL,
+      crypto: { secret: process.env.SESSION_SECRET }
+    }),
     cookie: {
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
 );
