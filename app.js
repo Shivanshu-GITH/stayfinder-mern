@@ -1,6 +1,4 @@
 // ================= REQUIRED PACKAGES =================
-const connectMongo = require("connect-mongo");
-const MongoStore = connectMongo.default || connectMongo;
 require("dotenv").config();
 
 const express = require("express");
@@ -8,9 +6,12 @@ const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
 
+const connectMongo = require("connect-mongo");
+const MongoStore = connectMongo.default || connectMongo;
+
 const Listing = require("./models/listing");
 const Review = require("./models/reviews");
-const User = require("./models/User");
+const User = require("./models/user");        // ← lowercase u (Linux fix)
 
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
@@ -56,7 +57,6 @@ app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // ================= SESSION =================
-
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -313,10 +313,8 @@ app.delete("/listings/:id/images",
     const { id } = req.params;
     const { filename } = req.body;
 
-    // Delete from Cloudinary
     await cloudinary.uploader.destroy(filename);
 
-    // Remove from DB
     await Listing.findByIdAndUpdate(id, {
       $pull: { images: { filename: filename } }
     });
@@ -413,19 +411,16 @@ app.get("/dashboard",
     const user = await User.findById(req.user._id)
       .populate("wishlist");
 
-    // Reviews written
     const reviewCount = await Review.countDocuments({
       author: req.user._id
     });
 
-    // Listings created
     const userListings = await Listing.find({
       owner: req.user._id
     });
 
     const listingCount = userListings.length;
 
-    // Reviews received
     let reviewsReceived = 0;
     userListings.forEach(listing => {
       reviewsReceived += listing.reviews.length;
