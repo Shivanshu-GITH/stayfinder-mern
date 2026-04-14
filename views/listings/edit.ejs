@@ -17,17 +17,17 @@
 
               <% for (let img of listing.images) { %>
 
-                <div style="position:relative">
+                <div class="uploaded-image-wrapper">
 
                   <img
                     src="<%= img.url %>"
-                    style="width:120px;height:120px;object-fit:cover;border-radius:10px;"
+                    class="uploaded-image-item"
                   >
 
                   <form
                     action="/listings/<%= listing._id %>/images?_method=DELETE"
                     method="POST"
-                    style="position:absolute;top:5px;right:5px"
+                    class="uploaded-image-delete-form"
                   >
 
                     <input
@@ -38,7 +38,7 @@
 
                     <button
                       type="submit"
-                      style="background:red;color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:16px;cursor:pointer;">
+                      class="uploaded-image-delete-btn">
                       ×
                     </button>
 
@@ -138,7 +138,7 @@
             >
 
             <div id="imagePreviewContainer"
-                 class="mt-3 d-flex flex-wrap gap-2">
+                 class="mt-3 d-flex flex-wrap image-preview-grid">
             </div>
 
           </div>
@@ -206,10 +206,7 @@ imageInput.addEventListener("change", function () {
   Array.from(this.files).forEach(file => {
     const img = document.createElement("img");
     img.src = URL.createObjectURL(file);
-    img.style.width = "120px";
-    img.style.height = "120px";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "10px";
+    img.className = "image-preview-item";
     previewContainer.appendChild(img);
   });
 });

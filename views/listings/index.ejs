@@ -3,11 +3,11 @@
 <div class="container mt-5 mb-5">
 
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-semibold">Explore Listings</h2>
+    <h2 class="fw-semibold page-section-heading mb-0">Explore Listings</h2>
   </div>
 
   <!-- SEARCH + FILTER BAR -->
-  <form method="GET" action="/listings" class="row g-3 mb-4">
+  <form method="GET" action="/listings" class="row g-3 mb-4 listing-filter-form">
 
     <!-- Search -->
     <div class="col-md-3">
@@ -75,14 +75,14 @@
     </div>
 
     <!-- Button -->
-    <div class="col-md-1 d-grid">
+    <div class="col-md-1 d-grid filter-submit-wrap">
       <button class="btn btn-dark">Go</button>
     </div>
 
   </form>
 
   <!-- MAP -->
-  <div id="map" style="height: 500px; width: 100%; margin-bottom: 30px; border-radius: 12px;"></div>
+  <div id="map" class="listing-map"></div>
 
   <% if (allListings.length === 0) { %>
 
@@ -111,7 +111,6 @@
                 <img
                   src="<%= listing.images[0].url %>"
                   class="card-img-top"
-                  style="height:250px; object-fit:cover;"
                 >
 
               <% } else { %>
@@ -119,7 +118,6 @@
                 <img
                   src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85"
                   class="card-img-top"
-                  style="height:250px; object-fit:cover;"
                 >
 
               <% } %>

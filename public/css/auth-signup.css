@@ -195,3 +195,66 @@ body {
     height: 18px;
     flex-shrink: 0;
 }
+
+@media (max-width: 576px) {
+    .auth-container {
+        padding: 1rem;
+        align-items: flex-start;
+    }
+
+    .auth-card {
+        width: 100%;
+        padding: 28px 18px;
+        border-radius: 18px;
+    }
+
+    .auth-card h2 {
+        font-size: 1.35rem;
+        margin-bottom: 20px;
+    }
+
+    .auth-btn {
+        padding: 11px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+        width: 38%;
+    }
+}
+
+
+@media (max-width: 360px) {
+    .auth-container {
+        min-height: auto;
+        padding: 0.75rem;
+    }
+
+    .auth-card {
+        padding: 22px 14px;
+    }
+
+    .auth-card h2 {
+        font-size: 1.2rem;
+    }
+
+    .form-group input {
+        padding: 10px 11px;
+        font-size: 0.9rem;
+    }
+
+    .auth-btn {
+        font-size: 0.95rem;
+    }
+}
+
+@media (min-width: 1920px) {
+    .auth-card {
+        width: 480px;
+        padding: 52px 46px;
+    }
+
+    .auth-card h2 {
+        font-size: 1.75rem;
+    }
+}

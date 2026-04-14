@@ -1,5 +1,5 @@
 .hero {
-    height: 92vh;
+    min-height: 92vh;
     background: linear-gradient(
         rgba(0, 0, 0, 0.55),
         rgba(0, 0, 0, 0.55)
@@ -43,7 +43,7 @@
 }
 
 .hero-title {
-    font-size: 3.8rem;
+    font-size: clamp(2rem, 1.4rem + 3.2vw, 3.8rem);
     font-weight: 800;
     letter-spacing: -0.5px;
     line-height: 1.15;
@@ -51,7 +51,7 @@
 }
 
 .hero-subtitle {
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 0.9rem + 0.8vw, 1.25rem);
     margin-top: 1.2rem;
     margin-bottom: 2.5rem;
     color: rgba(255,255,255,0.88);
@@ -115,4 +115,85 @@
     background: #fafafa;
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+@media (max-width: 992px) {
+    .hero {
+        min-height: 80vh;
+        padding: 2.5rem 1rem;
+    }
+
+    .hero-subtitle {
+        margin-bottom: 1.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        min-height: 74vh;
+    }
+
+    .hero-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        max-width: 320px;
+        margin: 0 auto;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+        margin: 0 !important;
+        padding: 11px 22px;
+    }
+
+    .features {
+        padding: 3rem 0;
+    }
+
+    .features p {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 360px) {
+    .hero {
+        min-height: 64vh;
+        padding: 1.8rem 0.75rem;
+    }
+
+    .hero-title {
+        letter-spacing: 0;
+    }
+
+    .hero-subtitle {
+        margin-top: 0.9rem;
+        margin-bottom: 1.3rem;
+        line-height: 1.45;
+    }
+
+    .hero-buttons {
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 1920px) {
+    .hero {
+        min-height: 86vh;
+    }
+
+    .hero-subtitle {
+        max-width: 640px;
+        font-size: 1.35rem;
+    }
+
+    .hero-buttons .btn {
+        padding: 14px 36px;
+        font-size: 1.08rem;
+    }
+
+    .features {
+        padding: 6rem 0;
+    }
 }

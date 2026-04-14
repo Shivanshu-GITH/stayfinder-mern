@@ -76,7 +76,7 @@
               accept="image/*"
             />
 
-            <div id="imagePreviewContainer" class="mt-3 d-flex flex-wrap gap-2"></div>
+            <div id="imagePreviewContainer" class="mt-3 d-flex flex-wrap image-preview-grid"></div>
           </div>
 
           <div class="row">
@@ -127,7 +127,7 @@
           <!-- MAP -->
           <div class="mb-4">
             <label class="form-label">Select Location on Map</label>
-            <div id="map" style="height: 400px; border-radius: 10px;"></div>
+            <div id="map" class="form-map"></div>
             <small class="text-muted">
               Click anywhere on map to set exact location
             </small>
@@ -154,10 +154,7 @@ imageInput.addEventListener("change", function () {
   Array.from(this.files).forEach(file => {
     const img = document.createElement("img");
     img.src = URL.createObjectURL(file);
-    img.style.width = "120px";
-    img.style.height = "120px";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "10px";
+    img.className = "image-preview-item";
     previewContainer.appendChild(img);
   });
 });

@@ -145,13 +145,13 @@
               </div>
 
               <!-- ACTION BUTTONS -->
-              <div class="d-flex gap-2">
+              <div class="dashboard-actions">
 
-                <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-outline-dark w-50">
+                <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-outline-dark">
                   Edit
                 </a>
 
-                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="w-50">
+                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
                   <button class="btn btn-sm btn-danger w-100">
                     Delete
                   </button>
