@@ -5,6 +5,16 @@ const plm = require("passport-local-mongoose");
 const passportLocalMongoose = plm.default || plm;
 
 const UserSchema = new Schema({
+  firebaseUid: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  authProvider: {
+    type: String,
+    enum: ["email", "google"],
+    default: "email",
+  },
   email: {
     type: String,
     required: true,

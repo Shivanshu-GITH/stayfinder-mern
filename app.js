@@ -39,35 +39,100 @@ const {
   isReviewAuthor,
 } = require("./middleware");
 
-const MONGO_URL = process.env.MONGO_URL;
+const PORT = Number(process.env.PORT) || 8081;
+const requiredEnvVars = [
+  "MONGO_URL",
+  "SESSION_SECRET",
+  "FIREBASE_API_KEY",
+  "FIREBASE_AUTH_DOMAIN",
+  "FIREBASE_PROJECT_ID",
+  "FIREBASE_STORAGE_BUCKET",
+  "FIREBASE_MESSAGING_SENDER_ID",
+  "FIREBASE_APP_ID",
+  "FIREBASE_MEASUREMENT_ID",
+];
 
-// ================= DB =================
-mongoose
-  .connect(MONGO_URL)
-  .then(() => console.log("Connected to DB"))
-  .catch(err => console.log(err));
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required environment variable: ${envVar}`);
+  }
+}
+
+const MONGO_URL = process.env.MONGO_URL;
+const FIREBASE_CONFIG = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+};
 
 // ================= APP CONFIG =================
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.disable("x-powered-by");
 
-app.use(express.urlencoded({ extended: true }));
+mongoose.set("bufferCommands", false);
+mongoose.connection.on("disconnected", () => {
+  console.error("MongoDB disconnected");
+});
+mongoose.connection.on("error", err => {
+  console.error("MongoDB connection error:", err.message);
+});
+
+async function ensureDbConnection() {
+  if (mongoose.connection.readyState === 1) return;
+  await mongoose.connect(MONGO_URL, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    family: 4,
+  });
+}
+
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(express.json({ limit: "10kb" }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(async (req, res, next) => {
+  const dbRequiredPaths = ["/listings", "/dashboard", "/wishlist", "/auth/firebase", "/logout"];
+  const requiresDb = dbRequiredPaths.some(
+    routePath => req.path === routePath || req.path.startsWith(`${routePath}/`)
+  );
+
+  if (!requiresDb) return next();
+
+  try {
+    await ensureDbConnection();
+    return next();
+  } catch (err) {
+    return next(new ExpressError("Database is temporarily unavailable. Please try again.", 503));
+  }
+});
+
 // ================= SESSION =================
+const sessionStore = MongoStore.create({
+  mongoUrl: MONGO_URL,
+  crypto: { secret: process.env.SESSION_SECRET },
+});
+
+sessionStore.on("error", err => {
+  console.error("Session store error:", err.message);
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URL,
-      crypto: { secret: process.env.SESSION_SECRET }
-    }),
+    store: sessionStore,
     cookie: {
       httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
@@ -97,9 +162,31 @@ app.get("/", (req, res) => {
   res.render("home");
 });
 
+app.get("/health", async (req, res) => {
+  const state = mongoose.connection.readyState;
+  const stateText = ["disconnected", "connected", "connecting", "disconnecting"][state] || "unknown";
+  let ping = "not-connected";
+
+  if (state === 1) {
+    try {
+      await mongoose.connection.db.admin().command({ ping: 1 });
+      ping = "ok";
+    } catch (err) {
+      ping = "failed";
+    }
+  }
+
+  res.status(state === 1 && ping === "ok" ? 200 : 503).json({
+    status: state === 1 && ping === "ok" ? "ok" : "degraded",
+    dbState: stateText,
+    dbPing: ping,
+  });
+});
+
 // ================= AUTH =================
 app.get("/signup", (req, res) => {
-  res.render("users/signup");
+  res.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.render("users/signup", { firebaseConfig: FIREBASE_CONFIG });
 });
 
 app.post("/signup", wrapAsync(async (req, res, next) => {
@@ -121,8 +208,111 @@ app.post("/signup", wrapAsync(async (req, res, next) => {
 }));
 
 app.get("/login", (req, res) => {
-  res.render("users/login");
+  res.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.render("users/login", { firebaseConfig: FIREBASE_CONFIG });
 });
+
+async function getUniqueUsername(preferredUsername) {
+  const base = (preferredUsername || "user")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "")
+    .slice(0, 20) || "user";
+
+  let candidate = base;
+  let counter = 1;
+  while (await User.exists({ username: candidate })) {
+    counter += 1;
+    const suffix = `_${counter}`;
+    candidate = `${base.slice(0, Math.max(1, 30 - suffix.length))}${suffix}`;
+  }
+  return candidate;
+}
+
+async function saveUserResolvingUsernameCollision(user, preferredUsername) {
+  try {
+    await user.save();
+    return user;
+  } catch (err) {
+    const isDuplicateUsername =
+      err?.code === 11000 &&
+      (String(err?.message || "").includes("username_1") || "username" in (err?.keyPattern || {}));
+
+    if (!isDuplicateUsername) throw err;
+
+    user.username = await getUniqueUsername(preferredUsername || user.username || "user");
+    await user.save();
+    return user;
+  }
+}
+
+app.post("/auth/firebase", wrapAsync(async (req, res, next) => {
+  try {
+    const { idToken, username } = req.body;
+    if (!idToken) throw new ExpressError("Missing Firebase ID token", 400);
+
+    const tokenLookup = await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_CONFIG.apiKey}`,
+      { idToken }
+    );
+
+    const firebaseUser = tokenLookup.data?.users?.[0];
+    if (!firebaseUser || !firebaseUser.localId || !firebaseUser.email) {
+      throw new ExpressError("Invalid Firebase auth token", 401);
+    }
+
+    const providerId = firebaseUser.providerUserInfo?.[0]?.providerId;
+    const authProvider = providerId === "google.com" ? "google" : "email";
+    const derivedUsername = (username || firebaseUser.displayName || firebaseUser.email.split("@")[0]).trim();
+
+    let user = await User.findOne({
+      $or: [{ firebaseUid: firebaseUser.localId }, { email: firebaseUser.email }],
+    });
+
+    if (!user) {
+      const uniqueUsername = await getUniqueUsername(derivedUsername);
+      user = new User({
+        username: uniqueUsername,
+        email: firebaseUser.email,
+        firebaseUid: firebaseUser.localId,
+        authProvider,
+      });
+      await saveUserResolvingUsernameCollision(user, derivedUsername);
+    } else {
+      let isUpdated = false;
+      if (!user.firebaseUid) {
+        user.firebaseUid = firebaseUser.localId;
+        isUpdated = true;
+      }
+      if (!user.authProvider) {
+        user.authProvider = authProvider;
+        isUpdated = true;
+      }
+      if (!user.username) {
+        user.username = await getUniqueUsername(derivedUsername);
+        isUpdated = true;
+      }
+      if (isUpdated) {
+        await saveUserResolvingUsernameCollision(user, derivedUsername);
+      }
+    }
+
+    req.login(user, err => {
+      if (err) return next(err);
+      req.flash("success", "Welcome to StayFinder!");
+      return res.json({ ok: true, redirectTo: "/listings" });
+    });
+  } catch (err) {
+    const firebaseError = err.response?.data?.error?.message;
+    if (firebaseError) {
+      return res.status(401).json({ ok: false, message: firebaseError });
+    }
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({
+      ok: false,
+      message: err.message || "Unable to create server session.",
+    });
+  }
+}));
 
 app.post("/login",
   passport.authenticate("local", {
@@ -446,6 +636,7 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
+  console.error("Request failed:", req.method, req.originalUrl, "-", err.message);
   const { statusCode = 500, message = "Something went wrong" } = err;
   res.status(statusCode).render("error", {
     statusCode,
@@ -454,6 +645,20 @@ app.use((err, req, res, next) => {
 });
 
 // ================= SERVER =================
-app.listen(8080, () => {
-  console.log("Server running on port 8080");
+async function startServer() {
+  await mongoose.connect(MONGO_URL, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    family: 4,
+  });
+  console.log("Connected to DB");
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+startServer().catch(err => {
+  console.error("Failed to start server:", err.message);
+  process.exit(1);
 });
