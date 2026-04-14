@@ -23,6 +23,13 @@ body {
     max-width: 1200px;
 }
 
+.site-shell {
+    width: 100%;
+    max-width: min(1200px, calc(100% - 2.5rem));
+    margin-left: auto;
+    margin-right: auto;
+}
+
 img {
     max-width: 100%;
     height: auto;
@@ -238,6 +245,13 @@ textarea.form-control {
     margin: 4rem 0;
 }
 
+.centered-content-col {
+    width: 100%;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .edit-card,
 .show-card {
     background: #ffffff;
@@ -438,6 +452,10 @@ textarea.form-control {
     color: #6c757d;
     font-size: 0.9rem;
     line-height: 1.6;
+}
+
+.footer-intro {
+    max-width: 400px;
 }
 
 .footer-heading {
@@ -722,6 +740,10 @@ textarea.form-control {
         padding: 1.8rem 1.2rem;
     }
 
+    .centered-content-col {
+        max-width: 100%;
+    }
+
     .edit-title,
     .show-title {
         font-size: 1.4rem;
@@ -752,6 +774,10 @@ textarea.form-control {
     .container {
         padding-left: 1rem;
         padding-right: 1rem;
+    }
+
+    .site-shell {
+        max-width: calc(100% - 1.5rem);
     }
 
     .card-img-top {
@@ -791,12 +817,20 @@ textarea.form-control {
     .container {
         max-width: 1280px;
     }
+
+    .site-shell {
+        max-width: min(1280px, calc(100% - 3rem));
+    }
 }
 
 @media (max-width: 360px) {
     .container {
         padding-left: 0.75rem;
         padding-right: 0.75rem;
+    }
+
+    .site-shell {
+        max-width: calc(100% - 1.1rem);
     }
 
     .brand-logo {
@@ -899,11 +933,19 @@ textarea.form-control {
 
 @media (min-width: 1920px) {
     .container {
-        max-width: 1520px;
+        max-width: 1380px;
+    }
+
+    .site-shell {
+        max-width: min(1360px, calc(100% - 4rem));
     }
 
     .main-content {
         padding: 2.75rem 0;
+    }
+
+    .centered-content-col {
+        max-width: 1040px;
     }
 
     .listing-map {
