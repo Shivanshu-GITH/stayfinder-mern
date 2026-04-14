@@ -59,6 +59,13 @@ for (const envVar of requiredEnvVars) {
 }
 
 const MONGO_URL = process.env.MONGO_URL;
+const isProduction = process.env.NODE_ENV === "production";
+
+if (isProduction) {
+  // Required when running behind reverse proxies (Render/Railway/NGINX) so secure cookies are set correctly.
+  app.set("trust proxy", 1);
+}
+
 const FIREBASE_CONFIG = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -126,13 +133,14 @@ sessionStore.on("error", err => {
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
+    proxy: isProduction,
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: isProduction,
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
@@ -198,7 +206,10 @@ app.post("/signup", wrapAsync(async (req, res, next) => {
     req.login(registeredUser, err => {
       if (err) return next(err);
       req.flash("success", "Welcome to StayFinder!");
-      res.redirect("/listings");
+      req.session.save(saveErr => {
+        if (saveErr) return next(saveErr);
+        return res.redirect("/listings");
+      });
     });
 
   } catch (e) {
@@ -299,7 +310,10 @@ app.post("/auth/firebase", wrapAsync(async (req, res, next) => {
     req.login(user, err => {
       if (err) return next(err);
       req.flash("success", "Welcome to StayFinder!");
-      return res.json({ ok: true, redirectTo: "/listings" });
+      req.session.save(saveErr => {
+        if (saveErr) return next(saveErr);
+        return res.json({ ok: true, redirectTo: "/listings" });
+      });
     });
   } catch (err) {
     const firebaseError = err.response?.data?.error?.message;
@@ -321,7 +335,10 @@ app.post("/login",
   }),
   (req, res) => {
     req.flash("success", "Welcome back!");
-    res.redirect("/listings");
+    req.session.save(err => {
+      if (err) return res.redirect("/login");
+      return res.redirect("/listings");
+    });
   }
 );
 

@@ -94,6 +94,7 @@
     const completeServerLogin = async (idToken, username) => {
         const response = await fetch("/auth/firebase", {
             method: "POST",
+            credentials: "same-origin",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ idToken, username }),
         });
