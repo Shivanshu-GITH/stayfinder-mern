@@ -1,7 +1,7 @@
 // cloudinary configuration file
 
 const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const CloudinaryStorage = require("multer-storage-cloudinary");
 
 // connect cloudinary using env variables
 cloudinary.config({
